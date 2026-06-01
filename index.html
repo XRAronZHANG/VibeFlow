@@ -1,0 +1,3462 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VibeFlow · 灵感微流</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              ui: ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              space: {
+                950: '#070A12',
+                900: '#0B0F19',
+                850: '#0D1220',
+                800: '#111827',
+                700: '#1F2937',
+              },
+              neon: {
+                purple: '#A78BFA',
+                gold: '#F5D06F',
+                emerald: '#34D399',
+                cyan: '#67E8F9',
+              },
+            },
+            boxShadow: {
+              glowP: '0 0 0 1px rgba(167, 139, 250, 0.25), 0 10px 30px rgba(167, 139, 250, 0.12), 0 0 40px rgba(167, 139, 250, 0.10)',
+              glowG: '0 0 0 1px rgba(245, 208, 111, 0.20), 0 10px 30px rgba(245, 208, 111, 0.10), 0 0 35px rgba(245, 208, 111, 0.10)',
+              glowE: '0 0 0 1px rgba(52, 211, 153, 0.20), 0 10px 30px rgba(52, 211, 153, 0.10), 0 0 35px rgba(52, 211, 153, 0.10)',
+              soft: '0 10px 40px rgba(0,0,0,0.45)',
+            },
+            keyframes: {
+              floaty: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-8px)' },
+              },
+              breathe: {
+                '0%, 100%': { opacity: '0.55' },
+                '50%': { opacity: '0.95' },
+              },
+              pop: {
+                '0%': { transform: 'scale(0.92)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+              toastIn: {
+                '0%': { transform: 'translateY(-8px)', opacity: '0' },
+                '100%': { transform: 'translateY(0px)', opacity: '1' },
+              },
+              toastOut: {
+                '0%': { transform: 'translateY(0px)', opacity: '1' },
+                '100%': { transform: 'translateY(-6px)', opacity: '0' },
+              },
+              launch: {
+                '0%': { transform: 'translateY(0px) scale(1)', opacity: '1' },
+                '100%': { transform: 'translateY(-28px) scale(0.96)', opacity: '0' },
+              },
+              shimmer: {
+                '0%': { backgroundPosition: '0% 50%' },
+                '100%': { backgroundPosition: '100% 50%' },
+              },
+              pulseRing: {
+                '0%, 100%': { transform: 'scale(1)', opacity: '0.9' },
+                '50%': { transform: 'scale(1.04)', opacity: '1' },
+              },
+              coin: {
+                '0%': { transform: 'translateY(0) scale(1)' },
+                '35%': { transform: 'translateY(-3px) scale(1.06)' },
+                '100%': { transform: 'translateY(0) scale(1)' },
+              },
+              floatUp: {
+                '0%': { transform: 'translateY(0px)', opacity: '0' },
+                '15%': { opacity: '1' },
+                '100%': { transform: 'translateY(-22px)', opacity: '0' },
+              },
+              highlight: {
+                '0%': { transform: 'scale(1)', filter: 'brightness(1)' },
+                '50%': { transform: 'scale(1.04)', filter: 'brightness(1.2)' },
+                '100%': { transform: 'scale(1)', filter: 'brightness(1)' },
+              },
+            },
+            animation: {
+              floaty: 'floaty 6s ease-in-out infinite',
+              breathe: 'breathe 3.6s ease-in-out infinite',
+              pop: 'pop 220ms ease-out both',
+              toastIn: 'toastIn 180ms ease-out both',
+              toastOut: 'toastOut 220ms ease-in both',
+              launch: 'launch 280ms ease-out both',
+              shimmer: 'shimmer 6s ease-in-out infinite',
+              pulseRing: 'pulseRing 2.8s ease-in-out infinite',
+              coin: 'coin 240ms ease-out both',
+              floatUp: 'floatUp 650ms ease-out both',
+              highlight: 'highlight 650ms ease-out both',
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      /* Ambient space background + subtle starfield */
+      .space-bg {
+        background:
+          radial-gradient(1200px 700px at 20% -10%, rgba(167, 139, 250, 0.16), transparent 55%),
+          radial-gradient(900px 520px at 90% 20%, rgba(52, 211, 153, 0.10), transparent 60%),
+          radial-gradient(900px 680px at 40% 120%, rgba(245, 208, 111, 0.10), transparent 58%),
+          radial-gradient(1000px 600px at 70% 120%, rgba(103, 232, 249, 0.06), transparent 55%),
+          linear-gradient(180deg, #070a12, #0b0f19 30%, #070a12);
+      }
+
+      .starfield::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        background:
+          radial-gradient(circle at 18% 22%, rgba(255,255,255,0.22) 0 1px, transparent 2px),
+          radial-gradient(circle at 72% 18%, rgba(255,255,255,0.16) 0 1px, transparent 2px),
+          radial-gradient(circle at 36% 62%, rgba(255,255,255,0.18) 0 1px, transparent 2px),
+          radial-gradient(circle at 85% 72%, rgba(255,255,255,0.14) 0 1px, transparent 2px),
+          radial-gradient(circle at 10% 78%, rgba(255,255,255,0.12) 0 1px, transparent 2px);
+        opacity: 0.28;
+        pointer-events: none;
+        filter: blur(0.2px);
+        mix-blend-mode: screen;
+      }
+
+      .noise::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      }
+
+      /* Scrollbar subtle */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.18);
+        border-radius: 999px;
+        border: 2px solid rgba(11, 15, 25, 1);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.28);
+      }
+
+      /* Make textarea caret a bit softer */
+      textarea {
+        caret-color: rgba(167, 139, 250, 0.9);
+      }
+
+      /* Prevent iOS zoom */
+      input, textarea, button {
+        font-size: 16px;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen space-bg text-slate-100 font-ui selection:bg-violet-400/25 selection:text-slate-100">
+    <div class="relative min-h-screen overflow-hidden starfield noise">
+      <!-- Top glow line -->
+      <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/30 to-transparent"></div>
+
+      <!-- Header -->
+      <header class="relative z-10">
+        <div class="mx-auto max-w-6xl px-4 pt-7 sm:px-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2">
+                <div class="relative">
+                  <div class="absolute -inset-2 rounded-full blur-xl bg-violet-500/25 animate-breathe"></div>
+                  <div class="relative grid h-9 w-9 place-items-center rounded-2xl bg-white/5 ring-1 ring-white/10 shadow-glowP">
+                    <i data-lucide="sparkles" class="h-5 w-5 text-neon-purple"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-sm text-slate-300/80">VibeFlow · 灵感微流</div>
+                  <div class="text-xl font-semibold tracking-tight">把灵感丢进宇宙，让它自己发光。</div>
+                </div>
+              </div>
+              <p class="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300/80">
+                给拖延、ADHD 脑和天马行空的一点温柔：先捕捉，再拆解成<strong class="text-slate-200">3分钟（可调）微动</strong>，用一点小小玄学奖励，把你带回行动轨道。
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button
+                id="settingsBtn"
+                class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-3 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                title="设置：DeepSeek / 标签"
+              >
+                <i data-lucide="settings" class="h-4 w-4 text-slate-200/90"></i>
+                <span class="hidden sm:inline">设置</span>
+              </button>
+
+              <button
+                id="inboxBtn"
+                class="relative inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-3 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                title="收集箱：把微行动变成未来任务"
+              >
+                <i data-lucide="inbox" class="h-4 w-4 text-neon-cyan"></i>
+                <span class="hidden sm:inline">收集箱</span>
+                <span
+                  id="inboxBadge"
+                  class="absolute -right-1 -top-1 hidden min-w-5 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-emerald-950 shadow-glowE"
+                  >0</span
+                >
+              </button>
+
+              <div class="hidden sm:flex items-center gap-3 rounded-2xl bg-white/5 ring-1 ring-white/10 px-4 py-3 shadow-soft">
+                <div class="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-neon-gold/25 to-neon-purple/10 ring-1 ring-white/10">
+                  <i data-lucide="coins" class="h-5 w-5 text-neon-gold"></i>
+                </div>
+                <div>
+                  <div class="text-xs text-slate-300/70">累计功德</div>
+                  <div class="text-lg font-semibold tabular-nums">
+                    <span id="meritCount">0</span>
+                    <span class="text-xs font-medium text-slate-300/70"> / 永久保存</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main -->
+      <main class="relative z-10">
+        <div class="mx-auto max-w-6xl px-4 pb-24 pt-7 sm:px-6">
+          <!-- The Void -->
+          <section class="relative">
+            <div class="relative overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft">
+              <div class="pointer-events-none absolute inset-0">
+                <div class="absolute -top-20 -left-10 h-56 w-56 rounded-full bg-violet-500/15 blur-3xl animate-breathe"></div>
+                <div class="absolute -bottom-20 -right-10 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl animate-breathe" style="animation-delay: 1.2s"></div>
+              </div>
+
+              <div class="relative p-5 sm:p-6">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2 text-slate-200">
+                    <i data-lucide="orbit" class="h-4 w-4 text-neon-cyan"></i>
+                    <span class="text-sm font-medium">The Void · 极致输入区</span>
+                  </div>
+                  <div class="hidden sm:flex items-center gap-2 text-xs text-slate-300/70">
+                    <i data-lucide="corner-down-left" class="h-4 w-4"></i>
+                    <span>回车发射 · Shift+回车换行</span>
+                  </div>
+                </div>
+
+                <div class="mt-4 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+                  <div class="relative">
+                    <textarea
+                      id="ideaInput"
+                      rows="3"
+                      class="w-full resize-none rounded-3xl bg-transparent px-5 py-4 text-[15px] leading-relaxed text-slate-100 placeholder:text-slate-400/80 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40 transition shadow-[0_0_0_1px_rgba(255,255,255,0.05),_0_12px_40px_rgba(0,0,0,0.35)]"
+                      placeholder="有什么奇思妙想？尽管砸过来...（回车或点击发射）"
+                    ></textarea>
+                    <div class="pointer-events-none absolute inset-x-4 bottom-3 flex items-center justify-between text-xs text-slate-400/70">
+                      <span id="inputHint">先别想完美，只要丢进去。</span>
+                      <span class="tabular-nums" id="charCount">0</span>
+                    </div>
+                  </div>
+
+                  <div class="grid gap-2 lg:w-[160px]">
+                    <button
+                      id="launchBtn"
+                      class="group relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500/85 via-violet-400/70 to-emerald-400/60 px-5 py-3.5 text-sm font-semibold text-slate-950 shadow-glowP transition hover:brightness-110 active:scale-[0.98]"
+                    >
+                      <span class="absolute -inset-px rounded-2xl bg-gradient-to-r from-violet-400/45 via-neon-cyan/15 to-emerald-400/35 blur opacity-60 group-hover:opacity-90 transition"></span>
+                      <span class="relative inline-flex items-center gap-2">
+                        <i data-lucide="rocket" class="h-4 w-4"></i>
+                        发射
+                      </span>
+                    </button>
+
+                    <button
+                      id="taskifyBtn"
+                      class="group relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-300/85 via-emerald-300/70 to-neon-gold/60 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(103,232,249,0.18),_0_10px_26px_rgba(103,232,249,0.10)] transition hover:brightness-110 active:scale-[0.98]"
+                      title="把这段话变成一个日历任务"
+                    >
+                      <span class="absolute -inset-px rounded-2xl bg-gradient-to-r from-cyan-300/35 via-emerald-300/20 to-neon-gold/20 blur opacity-55 group-hover:opacity-90 transition"></span>
+                      <span class="relative inline-flex items-center gap-2">
+                        <i data-lucide="calendar-plus" class="h-4 w-4"></i>
+                        入历
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Vibe Tags -->
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                  <div class="text-xs text-slate-300/70 mr-1">Vibe 标签：</div>
+                  <div id="tagRow" class="flex flex-wrap items-center gap-2"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Panels -->
+          <section class="mt-6 grid gap-5 lg:grid-cols-2">
+            <!-- Idea Pool -->
+            <section class="rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft overflow-hidden">
+              <div class="p-5 sm:p-6">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="stars" class="h-4 w-4 text-neon-purple"></i>
+                    <h2 class="text-sm font-semibold tracking-tight">Idea Constellation · 灵感星空</h2>
+                  </div>
+                  <button
+                    id="colliderBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                  >
+                    <i data-lucide="wand-2" class="h-4 w-4 text-neon-gold"></i>
+                    灵感乱炖
+                    <span id="colliderSelCount" class="hidden rounded-full bg-white/5 px-2 py-0.5 text-[11px] font-bold tabular-nums ring-1 ring-white/10">0</span>
+                  </button>
+                </div>
+
+                <div class="mt-4 flex items-center justify-between text-xs text-slate-300/70">
+                  <div>
+                    <span class="inline-flex items-center gap-1">
+                      <span class="h-1.5 w-1.5 rounded-full bg-violet-400/80 animate-breathe"></span>
+                      <span id="microHint">点击任意星星 → 右侧生成 3 分钟微动</span>
+                    </span>
+                  </div>
+                  <div class="tabular-nums">
+                    <span id="activeCount">0</span> 个在轨
+                  </div>
+                </div>
+
+                <div id="ideaList" class="mt-4 grid gap-3 sm:grid-cols-2"></div>
+
+                <div id="emptyIdeas" class="mt-7 hidden">
+                  <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-center">
+                    <div class="mx-auto grid h-12 w-12 place-items-center rounded-3xl bg-white/5 ring-1 ring-white/10">
+                      <i data-lucide="moon" class="h-5 w-5 text-neon-cyan"></i>
+                    </div>
+                    <div class="mt-3 text-sm font-semibold">此刻宇宙很安静</div>
+                    <div class="mt-1 text-xs text-slate-300/70">从上面的 Void 丢一句话进来，让它变成第一颗星。</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Micro Action Mat -->
+            <section class="rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft overflow-hidden">
+              <div class="relative p-5 sm:p-6">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="timer" class="h-4 w-4 text-neon-emerald"></i>
+                    <h2 class="text-sm font-semibold tracking-tight">Micro‑Action Mat · 微行动看板</h2>
+                  </div>
+                  <div class="inline-flex items-center gap-2 text-xs text-slate-300/70">
+                    <span class="hidden sm:inline">规则：</span>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/5 px-2 py-1 ring-1 ring-white/10">
+                      <span class="text-slate-300/70">只做</span>
+                      <button
+                        id="durMinus"
+                        class="grid h-6 w-6 place-items-center rounded-full bg-white/5 ring-1 ring-white/10 hover:bg-white/10 transition active:scale-[0.98]"
+                        title="减少 1 分钟"
+                      >
+                        <i data-lucide="minus" class="h-3.5 w-3.5"></i>
+                      </button>
+                      <input
+                        id="durInput"
+                        type="number"
+                        min="1"
+                        max="30"
+                        step="1"
+                        class="w-14 rounded-full bg-black/25 px-2 py-1 text-center text-xs font-semibold tabular-nums ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                        value="3"
+                        title="分钟数（1-30）"
+                      />
+                      <button
+                        id="durPlus"
+                        class="grid h-6 w-6 place-items-center rounded-full bg-white/5 ring-1 ring-white/10 hover:bg-white/10 transition active:scale-[0.98]"
+                        title="增加 1 分钟"
+                      >
+                        <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+                      </button>
+                      <span class="text-slate-300/70">分钟</span>
+                    </span>
+                    <span class="rounded-full bg-white/5 px-2 py-1 ring-1 ring-white/10">只求“垃圾可见”</span>
+                  </div>
+                </div>
+
+                <!-- Trash Mode Banner -->
+                <div
+                  id="trashBanner"
+                  class="pointer-events-none absolute inset-x-4 top-4 hidden rounded-2xl border border-white/10 bg-gradient-to-r from-violet-500/15 via-white/5 to-emerald-400/10 px-4 py-2 text-xs text-slate-200/90 backdrop-blur"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex h-6 w-6 items-center justify-center rounded-xl bg-white/5 ring-1 ring-white/10">
+                      <i data-lucide="ban" class="h-4 w-4 text-neon-gold"></i>
+                    </span>
+                    <span class="font-semibold">完美主义退散！</span>
+                    <span class="text-slate-300/75">尽情产出垃圾草稿吧！你只需要“开始”。</span>
+                  </div>
+                </div>
+
+                <div class="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+                  <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-xs text-slate-300/70">当前选中灵感</div>
+                        <div id="selectedIdeaTitle" class="mt-1 text-sm font-semibold text-slate-100">
+                          还没有选中星星
+                        </div>
+                      </div>
+                      <div id="selectedTagPill" class="hidden rounded-full bg-white/5 px-3 py-1 text-xs ring-1 ring-white/10"></div>
+                    </div>
+
+                    <div class="mt-4">
+                      <div class="text-xs text-slate-300/70">AI 拆解（模拟）</div>
+                      <div id="actionText" class="mt-2 min-h-[72px] whitespace-pre-wrap rounded-2xl bg-black/20 px-4 py-3 text-sm leading-relaxed text-slate-200 ring-1 ring-white/10">
+                        点击左侧任意灵感，让它立刻变成一个“3分钟微动”（可调）。
+                      </div>
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap items-center gap-2">
+                      <button
+                        id="startBtn"
+                        class="inline-flex items-center gap-2 rounded-2xl bg-emerald-400/80 px-4 py-2.5 text-xs font-semibold text-emerald-950 shadow-glowE transition hover:brightness-110 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                        disabled
+                      >
+                        <i data-lucide="play" class="h-4 w-4"></i>
+                        <span id="startBtnLabel">开始 3 分钟</span>
+                      </button>
+
+                      <button
+                        id="endEarlyBtn"
+                        class="hidden inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                      >
+                        <i data-lucide="square" class="h-4 w-4"></i>
+                        提前结束
+                      </button>
+
+                      <button
+                        id="completeBtn"
+                        class="hidden inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon-gold/80 to-violet-400/60 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-glowG transition hover:brightness-110 active:scale-[0.99]"
+                      >
+                        <i data-lucide="check-circle-2" class="h-4 w-4"></i>
+                        标记完成
+                      </button>
+
+                      <button
+                        id="resetBtn"
+                        class="hidden inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                      >
+                        <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
+                        重来（不羞耻）
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Countdown -->
+                  <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                    <div class="flex items-center justify-between">
+                      <div id="durationTitle" class="text-xs text-slate-300/70">3 分钟倒计时</div>
+                      <div id="timerState" class="text-xs text-slate-300/60">待机</div>
+                    </div>
+
+                    <div class="mt-4 grid place-items-center">
+                      <div class="relative grid place-items-center">
+                        <svg class="h-44 w-44" viewBox="0 0 120 120">
+                          <defs>
+                            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stop-color="rgba(167,139,250,0.95)" />
+                              <stop offset="55%" stop-color="rgba(103,232,249,0.75)" />
+                              <stop offset="100%" stop-color="rgba(52,211,153,0.85)" />
+                            </linearGradient>
+                          </defs>
+                          <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.08)" stroke-width="10" fill="none" />
+                          <circle
+                            id="ring"
+                            cx="60"
+                            cy="60"
+                            r="50"
+                            stroke="url(#ringGrad)"
+                            stroke-width="10"
+                            fill="none"
+                            stroke-linecap="round"
+                            transform="rotate(-90 60 60)"
+                          />
+                        </svg>
+
+                        <div class="absolute grid place-items-center text-center">
+                          <div id="timeLeft" class="text-4xl font-semibold tabular-nums tracking-tight">03:00</div>
+                          <div class="mt-1 text-xs text-slate-300/70">只需要一点点。</div>
+                        </div>
+
+                        <div id="ringGlow" class="pointer-events-none absolute inset-0 hidden">
+                          <div class="absolute inset-6 rounded-full blur-xl bg-violet-500/20 animate-pulseRing"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 text-xs leading-relaxed text-slate-300/70">
+                      小技巧：把“结果”换成“证据”。哪怕是<strong class="text-slate-200">一张截图、一段乱写的草稿</strong>，都是胜利。
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <!-- Planner · 日历 / 收集箱 / 连胜 -->
+          <section class="mt-6 grid gap-5 lg:grid-cols-[1.4fr_0.6fr]">
+            <!-- Calendar -->
+            <section class="rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft overflow-hidden">
+              <div class="p-5 sm:p-6">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="calendar" class="h-4 w-4 text-neon-cyan"></i>
+                    <h2 class="text-sm font-semibold tracking-tight">时间星历 · 日历</h2>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button
+                      id="calPrevBtn"
+                      class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                      title="上个月"
+                    >
+                      <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                    </button>
+                    <button
+                      id="calTodayBtn"
+                      class="rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                      title="回到今天"
+                    >
+                      今天
+                    </button>
+                    <button
+                      id="calNextBtn"
+                      class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                      title="下个月"
+                    >
+                      <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <div class="text-lg font-semibold tracking-tight tabular-nums">
+                    <span id="calMonthLabel">—</span>
+                  </div>
+                  <div id="todayWeatherPill" class="hidden items-center gap-2 rounded-full bg-white/5 bg-[length:200%_200%] px-3 py-1.5 text-xs ring-1 ring-white/10 shadow-[0_0_30px_rgba(103,232,249,0.08)] animate-shimmer">
+                    <i id="todayWeatherIcon" data-lucide="cloud" class="h-4 w-4 text-neon-emerald"></i>
+                    <span id="todayWeatherText" class="text-slate-200">今日天气：—</span>
+                  </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-7 gap-2 text-xs text-slate-300/70">
+                  <div class="text-center">一</div>
+                  <div class="text-center">二</div>
+                  <div class="text-center">三</div>
+                  <div class="text-center">四</div>
+                  <div class="text-center">五</div>
+                  <div class="text-center">六</div>
+                  <div class="text-center text-slate-300/60">日</div>
+                </div>
+                <div id="calendarGrid" class="mt-2 grid grid-cols-7 gap-2"></div>
+
+                <div class="mt-4 text-xs text-slate-300/60">
+                  小规则：点击日期 → 右侧编辑任务。日历只要“可用”，不追求“完美”。
+                </div>
+              </div>
+            </section>
+
+            <!-- Right rail -->
+            <aside class="grid gap-5">
+              <!-- Day tasks -->
+              <section class="rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft overflow-hidden">
+                <div class="p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="list-checks" class="h-4 w-4 text-neon-emerald"></i>
+                      <div>
+                        <div class="text-xs text-slate-300/70">选中日期</div>
+                        <div id="selectedDateLabel" class="text-sm font-semibold">—</div>
+                      </div>
+                    </div>
+                    <button
+                      id="openTaskModalBtn"
+                      class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                      title="新增任务"
+                    >
+                      <i data-lucide="plus" class="h-4 w-4 text-neon-emerald"></i>
+                      新增
+                    </button>
+                  </div>
+
+                  <div id="dayTaskList" class="mt-4 grid gap-2"></div>
+                  <div id="dayTaskEmpty" class="mt-4 hidden rounded-3xl border border-white/10 bg-white/[0.03] p-4 text-center text-xs text-slate-300/70">
+                    这一天没有任务。你可以安排一个“未来的自己会感谢你”的小动作。
+                  </div>
+                </div>
+              </section>
+
+              <!-- Progress -->
+              <section class="rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft overflow-hidden">
+                <div class="p-5">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="flame" class="h-4 w-4 text-neon-gold"></i>
+                      <div class="text-sm font-semibold">连胜打卡</div>
+                    </div>
+                    <div class="text-xs text-slate-300/70">
+                      连胜 <span id="streakCount" class="font-semibold tabular-nums text-slate-100">0</span> 天
+                    </div>
+                  </div>
+
+                  <div class="mt-3">
+                    <div class="flex items-center justify-between text-xs text-slate-300/70">
+                      <span>今日完成率</span>
+                      <span class="tabular-nums"><span id="todayDoneText">0/0</span> · <span id="todayRateText">0%</span></span>
+                    </div>
+                    <div class="mt-2 h-2 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden">
+                      <div id="todayProgressBar" class="h-full w-0 bg-gradient-to-r from-emerald-400/80 via-neon-cyan/60 to-violet-400/60 transition-[width] duration-300"></div>
+                    </div>
+                    <div class="mt-2 text-[11px] leading-relaxed text-slate-300/60">
+                      连胜规则：如果今天有任务 → <span class="text-slate-200">全部完成</span>；如果今天没任务 → <span class="text-slate-200">完成 1 次微行动</span> 也算打卡。
+                    </div>
+                  </div>
+
+                  <div class="mt-4">
+                    <div class="text-xs text-slate-300/70">最近 7 天</div>
+                    <div id="streakMiniGrid" class="mt-2 grid grid-cols-7 gap-2"></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Inbox preview -->
+              <section class="rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft overflow-hidden">
+                <div class="p-5">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="inbox" class="h-4 w-4 text-neon-cyan"></i>
+                      <div class="text-sm font-semibold">收集箱</div>
+                    </div>
+                    <button
+                      id="openInboxBtn"
+                      class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                      title="打开收集箱"
+                    >
+                      <i data-lucide="external-link" class="h-4 w-4"></i>
+                      打开
+                    </button>
+                  </div>
+
+                  <div class="mt-2 text-xs text-slate-300/70">微行动完成后，AI 会把“长期任务候选”丢进这里。</div>
+                  <div id="inboxPreviewList" class="mt-4 grid gap-2"></div>
+                  <div id="inboxPreviewEmpty" class="mt-4 hidden rounded-3xl border border-white/10 bg-white/[0.03] p-4 text-center text-xs text-slate-300/70">
+                    暂无候选任务。去完成一个微行动，让 AI 帮你把未来铺出来。
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </section>
+
+          <!-- Graveyard -->
+          <section class="mt-6 rounded-3xl bg-white/5 ring-1 ring-white/10 shadow-soft overflow-hidden">
+            <div class="p-5 sm:p-6">
+              <button
+                id="graveToggle"
+                class="group flex w-full items-center justify-between gap-3 rounded-2xl bg-white/[0.03] px-4 py-3 ring-1 ring-white/10 hover:bg-white/5 transition"
+              >
+                <div class="flex items-center gap-2">
+                  <i data-lucide="skull" class="h-4 w-4 text-slate-300/80"></i>
+                  <div class="text-sm font-semibold">灵感残骸 / 墓地</div>
+                  <div class="ml-1 text-xs text-slate-300/70">
+                    <span id="graveCount">0</span> 个
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-300/70">
+                  <span class="hidden sm:inline">旧灵感会变成星尘</span>
+                  <i data-lucide="chevron-down" class="h-4 w-4 transition group-[.open]:rotate-180"></i>
+                </div>
+              </button>
+
+              <div id="gravePanel" class="mt-4 hidden">
+                <div class="text-xs text-slate-300/70">
+                  它们没有死，只是睡着了。你可以随时“抢救”——让它重新回到星空。
+                </div>
+                <div id="graveList" class="mt-3 grid gap-3 sm:grid-cols-2"></div>
+                <div id="emptyGrave" class="mt-5 hidden rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-center">
+                  <div class="text-sm font-semibold">墓地空空如也</div>
+                  <div class="mt-1 text-xs text-slate-300/70">这很棒：说明你还没囤太久。</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Ritual widget (mobile + desktop) -->
+      <div class="fixed bottom-4 right-4 z-30">
+        <div class="relative">
+          <button
+            id="ritualBtn"
+            class="group relative inline-flex items-center gap-2 rounded-3xl bg-white/5 px-4 py-3 ring-1 ring-white/10 shadow-soft backdrop-blur transition hover:bg-white/10 active:scale-[0.99]"
+            title="领取功德 / 财运"
+          >
+            <span class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-neon-gold/20 via-violet-500/10 to-emerald-400/15 blur opacity-0 transition group-hover:opacity-70"></span>
+            <span class="relative grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-neon-gold/25 to-neon-purple/10 ring-1 ring-white/10">
+              <i data-lucide="hand" class="h-5 w-5 text-neon-gold"></i>
+            </span>
+            <span class="relative hidden sm:block">
+              <span class="block text-xs text-slate-300/70">玄学功德</span>
+              <span class="block text-sm font-semibold">
+                点击 +1
+                <span id="ritualReadyDot" class="ml-2 inline-block h-2 w-2 rounded-full bg-slate-500/50"></span>
+              </span>
+            </span>
+          </button>
+
+          <div id="floatText" class="pointer-events-none absolute right-2 top-0 hidden text-xs font-semibold text-neon-gold">
+            +1 功德
+          </div>
+        </div>
+      </div>
+
+      <!-- Toasts -->
+      <div id="toasts" class="fixed right-4 top-4 z-40 flex w-[min(420px,calc(100vw-2rem))] flex-col gap-2"></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 z-50 hidden">
+      <div id="settingsBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+          <div class="relative overflow-hidden rounded-3xl bg-space-850/95 ring-1 ring-white/10 shadow-soft">
+            <div class="pointer-events-none absolute inset-0">
+              <div class="absolute -top-24 -left-10 h-64 w-64 rounded-full bg-violet-500/15 blur-3xl"></div>
+              <div class="absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl"></div>
+            </div>
+
+            <div class="relative p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="sliders-horizontal" class="h-4 w-4 text-neon-cyan"></i>
+                    <div class="text-sm font-semibold">设置</div>
+                  </div>
+                  <div class="mt-1 text-xs leading-relaxed text-slate-300/70">
+                    这里的所有配置都会保存在你的浏览器本地（localStorage）。<br />
+                    注意：把 DeepSeek API Key 存在本地意味着它对同一台电脑上的浏览器用户可见，请自行衡量。
+                  </div>
+                </div>
+                <button id="settingsCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <div class="mt-5 grid gap-5 lg:grid-cols-2">
+                <!-- DeepSeek -->
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm font-semibold">DeepSeek 接入</div>
+                    <label class="inline-flex items-center gap-2 text-xs text-slate-300/70">
+                      <input id="aiEnabled" type="checkbox" class="h-4 w-4 accent-violet-400" />
+                      启用
+                    </label>
+                  </div>
+                  <div class="mt-3 grid gap-3">
+                    <label class="grid gap-1">
+                      <span class="text-xs text-slate-300/70">API Key</span>
+                      <input
+                        id="aiKey"
+                        type="password"
+                        placeholder="sk-...（仅保存在本地）"
+                        class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                      />
+                    </label>
+                    <label class="grid gap-1">
+                      <span class="text-xs text-slate-300/70">Base URL</span>
+                      <input
+                        id="aiBaseUrl"
+                        type="text"
+                        placeholder="https://api.deepseek.com/v1"
+                        class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                      />
+                    </label>
+                    <label class="grid gap-1">
+                      <span class="text-xs text-slate-300/70">Model</span>
+                      <input
+                        id="aiModel"
+                        type="text"
+                        placeholder="deepseek-chat"
+                        class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                      />
+                    </label>
+                    <div class="text-xs text-slate-300/60">
+                      说明：本页会以 OpenAI 兼容格式调用 <code class="text-slate-200">/chat/completions</code>。若跨域被浏览器阻止，你可能需要用自己的代理/中转（仍保持无后端也可行：比如本地反代）。
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Tags -->
+              <div class="mt-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <div class="text-sm font-semibold">自定义 Vibe 标签</div>
+                    <div class="mt-1 text-xs text-slate-300/70">改 emoji / 名称 / 颜色。删除后不会删除旧灵感，只是会显示为“未知”。</div>
+                  </div>
+                  <button
+                    id="addTagBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                  >
+                    <i data-lucide="plus" class="h-4 w-4 text-neon-emerald"></i>
+                    添加
+                  </button>
+                </div>
+                <div id="tagEditorList" class="mt-4 grid gap-3"></div>
+              </div>
+
+              <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
+                <button
+                  id="settingsResetBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                >
+                  <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
+                  恢复默认
+                </button>
+                <button
+                  id="settingsSaveBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500/85 via-violet-400/70 to-emerald-400/60 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-glowP hover:brightness-110 transition active:scale-[0.99]"
+                >
+                  <i data-lucide="save" class="h-4 w-4"></i>
+                  保存并关闭
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inbox Modal -->
+    <div id="inboxModal" class="fixed inset-0 z-50 hidden">
+      <div id="inboxBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+          <div class="relative overflow-hidden rounded-3xl bg-space-850/95 ring-1 ring-white/10 shadow-soft">
+            <div class="pointer-events-none absolute inset-0">
+              <div class="absolute -top-24 -left-10 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl"></div>
+              <div class="absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-violet-500/12 blur-3xl"></div>
+            </div>
+
+            <div class="relative p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="inbox" class="h-4 w-4 text-neon-cyan"></i>
+                    <div class="text-sm font-semibold">收集箱 · 未来任务候选</div>
+                  </div>
+                  <div class="mt-1 text-xs text-slate-300/70">
+                    你可以在这里改标题、改日期/时间，然后把它加入日历。越“丑”越好，先让它存在。
+                  </div>
+                </div>
+                <button id="inboxCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <div class="mt-5 grid gap-3">
+                <div id="inboxList" class="grid gap-3"></div>
+                <div id="inboxEmpty" class="hidden rounded-3xl border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-slate-300/70">
+                  这里还没有东西。完成一次微行动后，我会把 AI 生成的长期任务丢进来。
+                </div>
+              </div>
+
+              <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
+                <button
+                  id="inboxAddManualBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                >
+                  <i data-lucide="plus" class="h-4 w-4 text-neon-emerald"></i>
+                  手动加一条
+                </button>
+                <button
+                  id="inboxCloseBtn2"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500/85 via-violet-400/70 to-emerald-400/60 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-glowP hover:brightness-110 transition active:scale-[0.99]"
+                >
+                  <i data-lucide="check" class="h-4 w-4"></i>
+                  关闭
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="fixed inset-0 z-50 hidden">
+      <div id="taskBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <div class="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+          <div class="relative overflow-hidden rounded-3xl bg-space-850/95 ring-1 ring-white/10 shadow-soft">
+            <div class="pointer-events-none absolute inset-0">
+              <div class="absolute -top-24 -left-10 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl"></div>
+              <div class="absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-neon-gold/10 blur-3xl"></div>
+            </div>
+
+            <div class="relative p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="clipboard-pen" class="h-4 w-4 text-neon-emerald"></i>
+                    <div id="taskModalTitle" class="text-sm font-semibold">任务</div>
+                  </div>
+                  <div class="mt-1 text-xs text-slate-300/70">写得越笨越好：能开始就行。</div>
+                </div>
+                <button id="taskCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <div class="mt-5 grid gap-3">
+                <label class="grid gap-1">
+                  <span class="text-xs text-slate-300/70">标题</span>
+                  <input id="taskTitleInput" type="text" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                </label>
+                <div class="grid gap-3 sm:grid-cols-3">
+                  <label class="grid gap-1 sm:col-span-1">
+                    <span class="text-xs text-slate-300/70">日期</span>
+                    <input id="taskDateInput" type="date" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1 sm:col-span-1">
+                    <span class="text-xs text-slate-300/70">时间（可选）</span>
+                    <input id="taskTimeInput" type="time" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1 sm:col-span-1">
+                    <span class="text-xs text-slate-300/70">时长（分钟）</span>
+                    <input id="taskDurationInput" type="number" min="1" max="480" step="1" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                </div>
+                <label class="grid gap-1">
+                  <span class="text-xs text-slate-300/70">备注（可选）</span>
+                  <textarea id="taskNotesInput" rows="3" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"></textarea>
+                </label>
+              </div>
+
+              <div class="mt-5 flex flex-wrap items-center justify-between gap-2">
+                <button
+                  id="taskDeleteBtn"
+                  class="hidden inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                >
+                  <i data-lucide="trash-2" class="h-4 w-4"></i>
+                  删除
+                </button>
+                <div class="ml-auto flex items-center gap-2">
+                  <button
+                    id="taskCancelBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                  >
+                    <i data-lucide="x" class="h-4 w-4"></i>
+                    取消
+                  </button>
+                  <button
+                    id="taskSaveBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500/85 via-violet-400/70 to-emerald-400/60 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-glowP hover:brightness-110 transition active:scale-[0.99]"
+                  >
+                    <i data-lucide="save" class="h-4 w-4"></i>
+                    保存
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collider Modal -->
+    <div id="colliderModal" class="fixed inset-0 z-50 hidden">
+      <div id="colliderBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+          <div class="relative overflow-hidden rounded-3xl bg-space-850/95 ring-1 ring-white/10 shadow-soft">
+            <div class="pointer-events-none absolute inset-0">
+              <div class="absolute -top-24 -left-10 h-64 w-64 rounded-full bg-violet-500/12 blur-3xl"></div>
+              <div class="absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-neon-gold/10 blur-3xl"></div>
+            </div>
+
+            <div class="relative p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="wand-2" class="h-4 w-4 text-neon-gold"></i>
+                    <div class="text-sm font-semibold">灵感乱炖 · 合成新灵感</div>
+                  </div>
+                  <div class="mt-1 text-xs text-slate-300/70">
+                    你可以改稿再接受。接受后：会删除你勾选的旧灵感，然后把新灵感丢回星空。
+                  </div>
+                </div>
+                <button id="colliderCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <div class="mt-5 grid gap-4">
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+                  <div class="text-xs text-slate-300/70">这次参与乱炖的灵感</div>
+                  <div id="colliderSelectedList" class="mt-2 flex flex-wrap gap-2"></div>
+                </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="text-xs text-slate-300/70">新灵感（可编辑）</div>
+                    <div class="flex items-center gap-2">
+                      <div class="text-xs text-slate-300/70">标签</div>
+                      <select
+                        id="colliderTagSelect"
+                        class="rounded-2xl bg-black/25 px-3 py-2 text-xs font-semibold ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                      ></select>
+                    </div>
+                  </div>
+                  <textarea
+                    id="colliderText"
+                    rows="4"
+                    class="mt-3 w-full resize-none rounded-3xl bg-black/20 px-4 py-3 text-sm leading-relaxed text-slate-100 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                    placeholder="新灵感会出现在这里…"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
+                <button
+                  id="colliderCancelBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                >
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                  不接受
+                </button>
+                <button
+                  id="colliderAcceptBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon-gold/85 to-violet-400/60 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-glowG hover:brightness-110 transition active:scale-[0.99]"
+                >
+                  <i data-lucide="check" class="h-4 w-4"></i>
+                  接受合并
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /***********************
+       * VibeFlow (Local-First)
+       ***********************/
+      const LS = {
+        IDEAS: 'vibeflow_ideas_v1',
+        MERIT: 'vibeflow_merit_v1',
+        UI: 'vibeflow_ui_v1', // legacy
+        SETTINGS: 'vibeflow_settings_v2',
+        TASKS: 'vibeflow_tasks_v1',
+        INBOX: 'vibeflow_inbox_v1',
+        STATS: 'vibeflow_stats_v1',
+        WEATHER: 'vibeflow_weather_v1',
+      };
+
+      const DECAY_MS = 12 * 60 * 60 * 1000; // 12小时后“发霉”（可自行改）
+      const DEFAULT_DURATION_SEC = 3 * 60;
+
+      const DEFAULT_TAGS = [
+        { key: 'crazy', emoji: '🤪', label: '瞎想', accent: 'purple' },
+        { key: 'money', emoji: '🔥', label: '搞钱', accent: 'gold' },
+        { key: 'think', emoji: '🤔', label: '琢磨', accent: 'cyan' },
+        { key: 'mono', emoji: '🌙', label: '独白', accent: 'emerald' },
+      ];
+
+      const DEFAULT_AI = {
+        enabled: false,
+        apiKey: '',
+        baseUrl: 'https://api.deepseek.com/v1',
+        model: 'deepseek-chat',
+      };
+
+      /** @type {{ ideas: any[], merit: number, tags: any[], ai: any, tasks: any[], inbox: any[], stats: any, weather: any, ui: { selectedTag: string, graveOpen: boolean, durationSec: number } }} */
+      let state = {
+        ideas: [],
+        merit: 0,
+        tags: DEFAULT_TAGS,
+        ai: DEFAULT_AI,
+        tasks: [],
+        inbox: [],
+        stats: { microByDate: {} },
+        weather: { today: null, fetchedAt: 0, lat: null, lon: null },
+        ui: { selectedTag: 'crazy', graveOpen: false, durationSec: DEFAULT_DURATION_SEC },
+      };
+
+      let selectedIdeaId = null;
+      let ritualReady = false;
+      let deconstructReqToken = null;
+      let editingTaskId = null;
+
+      const calendar = {
+        viewYear: new Date().getFullYear(),
+        viewMonth: new Date().getMonth(), // 0-11
+        selectedYMD: null, // init in bootstrap
+      };
+
+      const timer = {
+        running: false,
+        endAt: 0,
+        totalSec: DEFAULT_DURATION_SEC,
+        raf: null,
+      };
+
+      // DOM
+      const el = {
+        meritCount: document.getElementById('meritCount'),
+        ideaInput: document.getElementById('ideaInput'),
+        launchBtn: document.getElementById('launchBtn'),
+        taskifyBtn: document.getElementById('taskifyBtn'),
+        charCount: document.getElementById('charCount'),
+        tagRow: document.getElementById('tagRow'),
+        ideaList: document.getElementById('ideaList'),
+        emptyIdeas: document.getElementById('emptyIdeas'),
+        activeCount: document.getElementById('activeCount'),
+        colliderBtn: document.getElementById('colliderBtn'),
+        selectedIdeaTitle: document.getElementById('selectedIdeaTitle'),
+        selectedTagPill: document.getElementById('selectedTagPill'),
+        actionText: document.getElementById('actionText'),
+        startBtn: document.getElementById('startBtn'),
+        completeBtn: document.getElementById('completeBtn'),
+        resetBtn: document.getElementById('resetBtn'),
+        trashBanner: document.getElementById('trashBanner'),
+        timerState: document.getElementById('timerState'),
+        timeLeft: document.getElementById('timeLeft'),
+        ring: document.getElementById('ring'),
+        ringGlow: document.getElementById('ringGlow'),
+        durationTitle: document.getElementById('durationTitle'),
+        startBtnLabel: document.getElementById('startBtnLabel'),
+        endEarlyBtn: document.getElementById('endEarlyBtn'),
+        microHint: document.getElementById('microHint'),
+        durMinus: document.getElementById('durMinus'),
+        durPlus: document.getElementById('durPlus'),
+        durInput: document.getElementById('durInput'),
+        ritualBtn: document.getElementById('ritualBtn'),
+        ritualReadyDot: document.getElementById('ritualReadyDot'),
+        floatText: document.getElementById('floatText'),
+        toasts: document.getElementById('toasts'),
+        graveToggle: document.getElementById('graveToggle'),
+        gravePanel: document.getElementById('gravePanel'),
+        graveList: document.getElementById('graveList'),
+        graveCount: document.getElementById('graveCount'),
+        emptyGrave: document.getElementById('emptyGrave'),
+
+        // settings
+        settingsBtn: document.getElementById('settingsBtn'),
+        settingsModal: document.getElementById('settingsModal'),
+        settingsBackdrop: document.getElementById('settingsBackdrop'),
+        settingsCloseBtn: document.getElementById('settingsCloseBtn'),
+        settingsSaveBtn: document.getElementById('settingsSaveBtn'),
+        settingsResetBtn: document.getElementById('settingsResetBtn'),
+        aiEnabled: document.getElementById('aiEnabled'),
+        aiKey: document.getElementById('aiKey'),
+        aiBaseUrl: document.getElementById('aiBaseUrl'),
+        aiModel: document.getElementById('aiModel'),
+        tagEditorList: document.getElementById('tagEditorList'),
+        addTagBtn: document.getElementById('addTagBtn'),
+
+        // inbox (header + widgets)
+        inboxBtn: document.getElementById('inboxBtn'),
+        inboxBadge: document.getElementById('inboxBadge'),
+        openInboxBtn: document.getElementById('openInboxBtn'),
+        inboxPreviewList: document.getElementById('inboxPreviewList'),
+        inboxPreviewEmpty: document.getElementById('inboxPreviewEmpty'),
+        colliderSelCount: document.getElementById('colliderSelCount'),
+
+        // calendar
+        calPrevBtn: document.getElementById('calPrevBtn'),
+        calNextBtn: document.getElementById('calNextBtn'),
+        calTodayBtn: document.getElementById('calTodayBtn'),
+        calMonthLabel: document.getElementById('calMonthLabel'),
+        calendarGrid: document.getElementById('calendarGrid'),
+        todayWeatherPill: document.getElementById('todayWeatherPill'),
+        todayWeatherIcon: document.getElementById('todayWeatherIcon'),
+        todayWeatherText: document.getElementById('todayWeatherText'),
+
+        // day tasks
+        selectedDateLabel: document.getElementById('selectedDateLabel'),
+        dayTaskList: document.getElementById('dayTaskList'),
+        dayTaskEmpty: document.getElementById('dayTaskEmpty'),
+        openTaskModalBtn: document.getElementById('openTaskModalBtn'),
+
+        // progress
+        streakCount: document.getElementById('streakCount'),
+        todayDoneText: document.getElementById('todayDoneText'),
+        todayRateText: document.getElementById('todayRateText'),
+        todayProgressBar: document.getElementById('todayProgressBar'),
+        streakMiniGrid: document.getElementById('streakMiniGrid'),
+
+        // inbox modal
+        inboxModal: document.getElementById('inboxModal'),
+        inboxBackdrop: document.getElementById('inboxBackdrop'),
+        inboxCloseBtn: document.getElementById('inboxCloseBtn'),
+        inboxCloseBtn2: document.getElementById('inboxCloseBtn2'),
+        inboxList: document.getElementById('inboxList'),
+        inboxEmpty: document.getElementById('inboxEmpty'),
+        inboxAddManualBtn: document.getElementById('inboxAddManualBtn'),
+
+        // task modal
+        taskModal: document.getElementById('taskModal'),
+        taskBackdrop: document.getElementById('taskBackdrop'),
+        taskCloseBtn: document.getElementById('taskCloseBtn'),
+        taskCancelBtn: document.getElementById('taskCancelBtn'),
+        taskSaveBtn: document.getElementById('taskSaveBtn'),
+        taskDeleteBtn: document.getElementById('taskDeleteBtn'),
+        taskModalTitle: document.getElementById('taskModalTitle'),
+        taskTitleInput: document.getElementById('taskTitleInput'),
+        taskDateInput: document.getElementById('taskDateInput'),
+        taskTimeInput: document.getElementById('taskTimeInput'),
+        taskDurationInput: document.getElementById('taskDurationInput'),
+        taskNotesInput: document.getElementById('taskNotesInput'),
+
+        // collider modal
+        colliderModal: document.getElementById('colliderModal'),
+        colliderBackdrop: document.getElementById('colliderBackdrop'),
+        colliderCloseBtn: document.getElementById('colliderCloseBtn'),
+        colliderCancelBtn: document.getElementById('colliderCancelBtn'),
+        colliderAcceptBtn: document.getElementById('colliderAcceptBtn'),
+        colliderSelectedList: document.getElementById('colliderSelectedList'),
+        colliderTagSelect: document.getElementById('colliderTagSelect'),
+        colliderText: document.getElementById('colliderText'),
+      };
+
+      // Ring geometry
+      const R = 50;
+      const CIRC = 2 * Math.PI * R;
+      el.ring.style.strokeDasharray = `${CIRC} ${CIRC}`;
+      el.ring.style.strokeDashoffset = `${CIRC}`;
+
+      function safeJsonParse(str, fallback) {
+        try {
+          return JSON.parse(str);
+        } catch {
+          return fallback;
+        }
+      }
+
+      function load() {
+        const ideas = safeJsonParse(localStorage.getItem(LS.IDEAS), []);
+        const merit = Number(localStorage.getItem(LS.MERIT) ?? 0) || 0;
+        const tasks = safeJsonParse(localStorage.getItem(LS.TASKS), []);
+        const inbox = safeJsonParse(localStorage.getItem(LS.INBOX), []);
+        const stats = safeJsonParse(localStorage.getItem(LS.STATS), { microByDate: {} });
+        const weather = safeJsonParse(localStorage.getItem(LS.WEATHER), state.weather);
+        const legacyUi = safeJsonParse(localStorage.getItem(LS.UI), {});
+        const settings = safeJsonParse(localStorage.getItem(LS.SETTINGS), null);
+        state.ideas = Array.isArray(ideas) ? ideas : [];
+        state.merit = merit;
+        state.tasks = Array.isArray(tasks) ? tasks : [];
+        state.inbox = Array.isArray(inbox) ? inbox : [];
+        state.stats = stats && typeof stats === 'object' ? { microByDate: {}, ...stats } : { microByDate: {} };
+        state.weather = weather && typeof weather === 'object' ? { ...state.weather, ...weather } : state.weather;
+        if (settings && typeof settings === 'object') {
+          state.ui = { ...state.ui, ...(settings.ui || {}) };
+          state.tags = Array.isArray(settings.tags) && settings.tags.length ? settings.tags : DEFAULT_TAGS;
+          state.ai = { ...DEFAULT_AI, ...(settings.ai || {}) };
+        } else {
+          state.ui = { ...state.ui, ...(legacyUi || {}) };
+          state.tags = DEFAULT_TAGS;
+          state.ai = DEFAULT_AI;
+        }
+
+        // migrations / guardrails
+        if (!state.ui.durationSec || Number.isNaN(Number(state.ui.durationSec))) state.ui.durationSec = DEFAULT_DURATION_SEC;
+        state.ui.durationSec = Math.max(60, Math.min(30 * 60, Math.round(Number(state.ui.durationSec))));
+        if (!state.tags?.length) state.tags = DEFAULT_TAGS;
+        if (!state.tags.some((t) => t.key === state.ui.selectedTag)) state.ui.selectedTag = state.tags[0].key;
+
+        // ideas guards + new fields
+        state.ideas = state.ideas
+          .filter((x) => x && typeof x === 'object' && x.id && x.text)
+          .map((x) => ({
+            id: String(x.id),
+            text: String(x.text),
+            tag: x.tag ? String(x.tag) : state.tags[0]?.key || 'crazy',
+            createdAt: Number(x.createdAt || now()),
+            archived: Boolean(x.archived),
+            mashSelected: Boolean(x.mashSelected),
+          }));
+
+        // task guards
+        state.tasks = state.tasks
+          .filter((t) => t && typeof t === 'object' && t.id && t.date)
+          .map((t) => ({
+            id: String(t.id),
+            title: String(t.title || '未命名任务'),
+            date: String(t.date),
+            time: t.time ? String(t.time) : '',
+            durationMin: Math.max(1, Math.round(Number(t.durationMin || 10))),
+            notes: t.notes ? String(t.notes) : '',
+            done: Boolean(t.done),
+            createdAt: Number(t.createdAt || now()),
+            updatedAt: Number(t.updatedAt || now()),
+          }));
+
+        // inbox guards
+        state.inbox = state.inbox
+          .filter((x) => x && typeof x === 'object' && x.id)
+          .map((x) => ({
+            id: String(x.id),
+            title: String(x.title || '长期任务候选'),
+            notes: x.notes ? String(x.notes) : '',
+            date: x.date ? String(x.date) : '',
+            time: x.time ? String(x.time) : '',
+            durationMin: Math.max(1, Math.round(Number(x.durationMin || 20))),
+            createdAt: Number(x.createdAt || now()),
+            source: String(x.source || 'ai'),
+          }));
+      }
+
+      function save() {
+        localStorage.setItem(LS.IDEAS, JSON.stringify(state.ideas));
+        localStorage.setItem(LS.MERIT, String(state.merit));
+        localStorage.setItem(LS.TASKS, JSON.stringify(state.tasks));
+        localStorage.setItem(LS.INBOX, JSON.stringify(state.inbox));
+        localStorage.setItem(LS.STATS, JSON.stringify(state.stats));
+        localStorage.setItem(LS.WEATHER, JSON.stringify(state.weather));
+        // legacy keep-alive
+        localStorage.setItem(LS.UI, JSON.stringify(state.ui));
+        localStorage.setItem(
+          LS.SETTINGS,
+          JSON.stringify({
+            ui: state.ui,
+            tags: state.tags,
+            ai: state.ai,
+          })
+        );
+      }
+
+      function uid() {
+        return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function now() {
+        return Date.now();
+      }
+
+      function isDecayed(idea) {
+        return Boolean(idea.archived) || now() - idea.createdAt > DECAY_MS;
+      }
+
+      function fmtAge(ms) {
+        const m = Math.max(0, Math.floor(ms / 60000));
+        if (m < 60) return `已存活 ${m}分钟`;
+        const h = Math.floor(m / 60);
+        if (h < 48) return `已存活 ${h}小时`;
+        const d = Math.floor(h / 24);
+        return `已存活 ${d}天`;
+      }
+
+      function fmtTimeLeft(sec) {
+        const s = Math.max(0, Math.floor(sec));
+        const mm = String(Math.floor(s / 60)).padStart(2, '0');
+        const ss = String(s % 60).padStart(2, '0');
+        return `${mm}:${ss}`;
+      }
+
+      function toYMD(d = new Date()) {
+        const dt = d instanceof Date ? d : new Date(d);
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, '0');
+        const day = String(dt.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function fromYMD(ymd) {
+        const [y, m, d] = String(ymd).split('-').map((x) => Number(x));
+        return new Date(y, (m || 1) - 1, d || 1);
+      }
+
+      function addDays(ymd, n) {
+        const dt = fromYMD(ymd);
+        dt.setDate(dt.getDate() + n);
+        return toYMD(dt);
+      }
+
+      function weekdayCN(ymd) {
+        const w = fromYMD(ymd).getDay(); // 0 Sun
+        const map = ['日', '一', '二', '三', '四', '五', '六'];
+        return map[w] || '';
+      }
+
+      function ymdLabel(ymd) {
+        return `${ymd} · 周${weekdayCN(ymd)}`;
+      }
+
+      function monthLabel(year, month0) {
+        const m = String(month0 + 1).padStart(2, '0');
+        return `${year}-${m}`;
+      }
+
+      function tagMeta(key) {
+        return (
+          state.tags.find((t) => t.key === key) || {
+            key: 'unknown',
+            emoji: '🌀',
+            label: '未知',
+            accent: 'purple',
+          }
+        );
+      }
+
+      function toast(message, tone = 'default') {
+        const div = document.createElement('div');
+        const toneStyles = {
+          default: 'from-white/8 to-white/3 ring-white/10',
+          good: 'from-emerald-400/15 to-white/3 ring-emerald-400/15',
+          warn: 'from-neon-gold/18 to-white/3 ring-neon-gold/15',
+          purple: 'from-violet-400/15 to-white/3 ring-violet-400/15',
+        };
+        div.className =
+          `animate-toastIn rounded-2xl bg-gradient-to-br ${toneStyles[tone] || toneStyles.default} ` +
+          `px-4 py-3 ring-1 backdrop-blur shadow-soft`;
+        div.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="mt-0.5 h-2 w-2 rounded-full bg-violet-400/80 animate-breathe"></div>
+            <div class="text-sm leading-relaxed text-slate-200">${escapeHtml(message)}</div>
+          </div>
+        `;
+        el.toasts.prepend(div);
+        setTimeout(() => {
+          div.classList.remove('animate-toastIn');
+          div.classList.add('animate-toastOut');
+          setTimeout(() => div.remove(), 240);
+        }, 2600);
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function renderMerit() {
+        el.meritCount.textContent = String(state.merit);
+      }
+
+      function renderTags() {
+        el.tagRow.innerHTML = '';
+        state.tags.forEach((t) => {
+          const btn = document.createElement('button');
+          const active = state.ui.selectedTag === t.key;
+          const accent =
+            t.accent === 'purple'
+              ? 'shadow-glowP'
+              : t.accent === 'gold'
+                ? 'shadow-glowG'
+                : t.accent === 'emerald'
+                  ? 'shadow-glowE'
+                  : 'shadow-[0_0_0_1px_rgba(103,232,249,0.22),_0_10px_30px_rgba(103,232,249,0.10)]';
+          btn.className =
+            'relative inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold ring-1 transition active:scale-[0.99] ' +
+            (active
+              ? `bg-white/10 ring-white/15 ${accent}`
+              : 'bg-white/5 ring-white/10 hover:bg-white/8');
+          btn.innerHTML = `
+            <span class="text-base leading-none">${t.emoji}</span>
+            <span>${escapeHtml(t.label)}</span>
+          `;
+          btn.addEventListener('click', () => {
+            state.ui.selectedTag = t.key;
+            save();
+            renderTags();
+            toast(`已切换标签：${t.emoji} ${t.label}`, 'purple');
+          });
+          el.tagRow.appendChild(btn);
+        });
+      }
+
+      function ideaCardHTML(idea) {
+        const t = tagMeta(idea.tag);
+        const age = now() - idea.createdAt;
+        const ageText = age > DECAY_MS * 0.8 ? '即将发霉' : fmtAge(age);
+        const min = Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60);
+        const mashOn = Boolean(idea.mashSelected);
+        const accent =
+          t.accent === 'purple'
+            ? 'ring-violet-400/20 hover:ring-violet-400/35'
+            : t.accent === 'gold'
+              ? 'ring-yellow-400/15 hover:ring-yellow-400/25'
+              : t.accent === 'emerald'
+                ? 'ring-emerald-400/18 hover:ring-emerald-400/28'
+                : 'ring-cyan-400/15 hover:ring-cyan-400/25';
+
+        return `
+          <div class="group relative">
+            <div class="absolute -inset-2 rounded-3xl blur-2xl opacity-0 transition group-hover:opacity-100 bg-gradient-to-r from-violet-500/12 via-cyan-400/6 to-emerald-400/10"></div>
+            <div
+              data-idea-id="${idea.id}"
+              role="button"
+              tabindex="0"
+              class="ideaCard relative w-full cursor-pointer select-none rounded-3xl bg-white/[0.03] px-4 py-4 ring-1 ${accent} ring-white/10 text-left transition hover:bg-white/[0.05] active:scale-[0.995] animate-floaty"
+              style="animation-delay: ${Math.floor(Math.random() * 1200)}ms"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 text-xs text-slate-300/70">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 ring-1 ring-white/10">
+                      <span class="text-sm">${t.emoji}</span>
+                      <span>${escapeHtml(t.label)}</span>
+                    </span>
+                    <span class="truncate">${escapeHtml(ageText)}</span>
+                  </div>
+                  <div class="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-100/95">
+                    ${escapeHtml(idea.text)}
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    data-mash-id="${idea.id}"
+                    class="mashBtn inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[11px] font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/10 transition active:scale-[0.99]"
+                    title="加入乱炖（勾选多个再点“灵感乱炖”）"
+                  >
+                    <i data-lucide="${mashOn ? 'check-square' : 'square'}" class="h-3.5 w-3.5 ${mashOn ? 'text-neon-emerald' : 'text-slate-300/80'}"></i>
+                    乱炖
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between">
+                <div class="text-[11px] text-slate-300/55">点击 → 生成 ${min} 分钟微动</div>
+                <div class="flex items-center gap-2 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
+                  <button
+                    data-archive-id="${idea.id}"
+                    class="archiveBtn inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[11px] font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/10 transition active:scale-[0.99]"
+                    title="送去墓地（归档）"
+                  >
+                    <i data-lucide="archive" class="h-3.5 w-3.5"></i>
+                    墓地
+                  </button>
+                  <button
+                    data-delete-idea-id="${idea.id}"
+                    class="deleteIdeaBtn inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[11px] font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/10 transition active:scale-[0.99]"
+                    title="删除灵感"
+                  >
+                    <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                    删除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function graveCardHTML(idea) {
+        const t = tagMeta(idea.tag);
+        const age = now() - idea.createdAt;
+        const ageText = fmtAge(age);
+        const faded = 'opacity-30 hover:opacity-60 transition';
+        return `
+          <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4 ${faded}">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 text-xs text-slate-300/70">
+                  <span class="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 ring-1 ring-white/10">
+                    <span class="text-sm">${t.emoji}</span>
+                    <span>${escapeHtml(t.label)}</span>
+                  </span>
+                  <span>${escapeHtml(ageText)}</span>
+                </div>
+                <div class="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-100/90">
+                  ${escapeHtml(idea.text)}
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <button data-rescue-id="${idea.id}" class="rescueBtn inline-flex items-center gap-2 rounded-2xl bg-emerald-400/75 px-3 py-2 text-xs font-semibold text-emerald-950 shadow-glowE hover:brightness-110 transition active:scale-[0.99]">
+                <i data-lucide="heart" class="h-4 w-4"></i>
+                抢救
+              </button>
+              <button data-delete-id="${idea.id}" class="deleteBtn inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]">
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+                永久删除
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderIdeas() {
+        // split by decay/archived
+        const active = state.ideas.filter((x) => !isDecayed(x));
+        const grave = state.ideas.filter((x) => isDecayed(x));
+
+        el.activeCount.textContent = String(active.length);
+        el.graveCount.textContent = String(grave.length);
+
+        el.ideaList.innerHTML = active.map(ideaCardHTML).join('');
+        el.graveList.innerHTML = grave.map(graveCardHTML).join('');
+
+        el.emptyIdeas.classList.toggle('hidden', active.length !== 0);
+        el.emptyGrave.classList.toggle('hidden', grave.length !== 0);
+
+        // Wire events for active cards
+        el.ideaList.querySelectorAll('.ideaCard').forEach((card) => {
+          const open = () => {
+            const ideaId = card.getAttribute('data-idea-id');
+            const idea = state.ideas.find((x) => x.id === ideaId);
+            if (!idea) return;
+            selectIdea(idea.id);
+          };
+          card.addEventListener('click', open);
+          card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              open();
+            }
+          });
+        });
+        el.ideaList.querySelectorAll('.archiveBtn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            archiveIdea(btn.getAttribute('data-archive-id'));
+          });
+        });
+        el.ideaList.querySelectorAll('.deleteIdeaBtn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = btn.getAttribute('data-delete-idea-id');
+            if (!id) return;
+            toast('确定要删除这条灵感吗？再点一次就删（给你 2 秒犹豫）。', 'warn');
+            btn.disabled = true;
+            setTimeout(() => (btn.disabled = false), 2000);
+            btn.addEventListener(
+              'click',
+              (e2) => {
+                e2.preventDefault();
+                e2.stopPropagation();
+                deleteIdea(id);
+              },
+              { once: true }
+            );
+          });
+        });
+        el.ideaList.querySelectorAll('.mashBtn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = btn.getAttribute('data-mash-id');
+            const idea = state.ideas.find((x) => x.id === id);
+            if (!idea) return;
+            idea.mashSelected = !Boolean(idea.mashSelected);
+            save();
+            renderIdeas();
+            renderColliderUI();
+          });
+        });
+
+        // Wire events for grave buttons
+        el.graveList.querySelectorAll('.rescueBtn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            rescueIdea(btn.getAttribute('data-rescue-id'));
+          });
+        });
+        el.graveList.querySelectorAll('.deleteBtn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-delete-id');
+            if (!id) return;
+            // soft confirm
+            toast('确定要永久删除吗？再点一次就删（给你 2 秒犹豫）。', 'warn');
+            btn.disabled = true;
+            setTimeout(() => (btn.disabled = false), 2000);
+            btn.addEventListener(
+              'click',
+              () => {
+                deleteIdea(id);
+              },
+              { once: true }
+            );
+          });
+        });
+
+        // Refresh lucide icons (since we inject HTML)
+        lucide.createIcons();
+      }
+
+      function setGraveOpen(open) {
+        state.ui.graveOpen = open;
+        save();
+        el.gravePanel.classList.toggle('hidden', !open);
+        el.graveToggle.classList.toggle('open', open);
+      }
+
+      function createIdea(text, tag) {
+        const idea = {
+          id: uid(),
+          text: text.trim(),
+          tag,
+          createdAt: now(),
+          archived: false,
+          mashSelected: false,
+        };
+        state.ideas.unshift(idea);
+        save();
+        renderIdeas();
+        return idea;
+      }
+
+      function archiveIdea(id) {
+        const idea = state.ideas.find((x) => x.id === id);
+        if (!idea) return;
+        idea.archived = true;
+        idea.mashSelected = false;
+        save();
+        renderIdeas();
+        renderColliderUI();
+        toast('已送入墓地：它会变成星尘（但随时可抢救）。', 'warn');
+      }
+
+      function rescueIdea(id) {
+        const idea = state.ideas.find((x) => x.id === id);
+        if (!idea) return;
+        idea.archived = false;
+        idea.createdAt = now(); // 复活：重置“新鲜度”
+        save();
+        renderIdeas();
+        renderColliderUI();
+        toast('抢救成功：它又回到星空了。', 'good');
+      }
+
+      function deleteIdea(id) {
+        const idx = state.ideas.findIndex((x) => x.id === id);
+        if (idx === -1) return;
+        const wasSelected = selectedIdeaId === id;
+        state.ideas.splice(idx, 1);
+        if (wasSelected) resetActionPanel();
+        save();
+        renderIdeas();
+        renderColliderUI();
+        toast('已删除：让宇宙更轻一点。', 'default');
+      }
+
+      /***********************
+       * Calendar / Tasks / Progress / Inbox / Weather
+       ***********************/
+      function tasksForDate(ymd) {
+        return state.tasks
+          .filter((t) => t.date === ymd)
+          .slice()
+          .sort((a, b) => {
+            const ta = a.time || '99:99';
+            const tb = b.time || '99:99';
+            if (ta !== tb) return ta.localeCompare(tb);
+            return (a.createdAt || 0) - (b.createdAt || 0);
+          });
+      }
+
+      function tasksDoneCount(ymd) {
+        return state.tasks.filter((t) => t.date === ymd && t.done).length;
+      }
+
+      function microCount(ymd) {
+        return Number(state.stats?.microByDate?.[ymd] || 0) || 0;
+      }
+
+      function bumpMicro(ymd, delta = 1) {
+        if (!state.stats || typeof state.stats !== 'object') state.stats = { microByDate: {} };
+        if (!state.stats.microByDate || typeof state.stats.microByDate !== 'object') state.stats.microByDate = {};
+        state.stats.microByDate[ymd] = microCount(ymd) + delta;
+        save();
+      }
+
+      function dailyWin(ymd) {
+        const total = state.tasks.filter((t) => t.date === ymd).length;
+        const done = tasksDoneCount(ymd);
+        if (total > 0) return done === total;
+        return microCount(ymd) > 0;
+      }
+
+      function computeStreak() {
+        const today = toYMD(new Date());
+        let count = 0;
+        for (let i = 0; i < 3650; i++) {
+          const d = addDays(today, -i);
+          if (dailyWin(d)) count++;
+          else break;
+        }
+        return count;
+      }
+
+      function renderProgress() {
+        const today = toYMD(new Date());
+        const total = state.tasks.filter((t) => t.date === today).length;
+        const done = tasksDoneCount(today);
+        const rate = total === 0 ? 0 : Math.round((done / total) * 100);
+        el.todayDoneText.textContent = `${done}/${total}`;
+        el.todayRateText.textContent = `${rate}%`;
+        el.todayProgressBar.style.width = `${rate}%`;
+
+        el.streakCount.textContent = String(computeStreak());
+
+        // mini 7 days (oldest -> newest)
+        const days = [];
+        for (let i = 6; i >= 0; i--) days.push(addDays(today, -i));
+        el.streakMiniGrid.innerHTML = days
+          .map((ymd) => {
+            const win = dailyWin(ymd);
+            const isToday = ymd === today;
+            return `
+              <div class="grid place-items-center">
+                <div class="text-[10px] text-slate-300/60">${ymd.slice(8, 10)}</div>
+                <div
+                  title="${escapeHtml(ymdLabel(ymd))}${win ? '：打卡' : '：未打卡'}"
+                  class="mt-1 h-7 w-7 rounded-2xl ring-1 ring-white/10 ${isToday ? 'ring-violet-400/30' : ''} ${
+                    win
+                      ? 'bg-gradient-to-br from-emerald-400/40 to-violet-400/20 shadow-[0_0_20px_rgba(52,211,153,0.18)]'
+                      : 'bg-white/5'
+                  }"
+                ></div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      function setSelectedDate(ymd) {
+        calendar.selectedYMD = ymd;
+        renderCalendar();
+        renderDayTasks();
+      }
+
+      function renderCalendar() {
+        const today = toYMD(new Date());
+        el.calMonthLabel.textContent = `${calendar.viewYear} 年 ${calendar.viewMonth + 1} 月`;
+
+        const first = new Date(calendar.viewYear, calendar.viewMonth, 1);
+        const firstDowMon0 = (first.getDay() + 6) % 7; // Monday=0
+        const daysInMonth = new Date(calendar.viewYear, calendar.viewMonth + 1, 0).getDate();
+        const prevMonthDays = new Date(calendar.viewYear, calendar.viewMonth, 0).getDate();
+
+        const cells = [];
+        for (let i = 0; i < 42; i++) {
+          const dayNum = i - firstDowMon0 + 1;
+          let y = calendar.viewYear;
+          let m0 = calendar.viewMonth;
+          let d = dayNum;
+          let inMonth = true;
+          if (dayNum <= 0) {
+            inMonth = false;
+            d = prevMonthDays + dayNum;
+            m0 = calendar.viewMonth - 1;
+            if (m0 < 0) {
+              m0 = 11;
+              y = calendar.viewYear - 1;
+            }
+          } else if (dayNum > daysInMonth) {
+            inMonth = false;
+            d = dayNum - daysInMonth;
+            m0 = calendar.viewMonth + 1;
+            if (m0 > 11) {
+              m0 = 0;
+              y = calendar.viewYear + 1;
+            }
+          }
+          const ymd = toYMD(new Date(y, m0, d));
+          const isToday = ymd === today;
+          const isSelected = ymd === calendar.selectedYMD;
+          const total = state.tasks.filter((t) => t.date === ymd).length;
+          const done = tasksDoneCount(ymd);
+
+          const weatherLine =
+            isToday && state.weather?.today
+              ? `<div class="mt-1 flex items-center gap-1 text-[10px] text-slate-200/90">
+                   <span class="text-[12px] leading-none">${escapeHtml(state.weather.today.emoji || '🌤️')}</span>
+                   <span>${escapeHtml(state.weather.today.short || state.weather.today.text || '')}</span>
+                 </div>`
+              : '';
+
+          cells.push(`
+            <button
+              data-ymd="${ymd}"
+              class="calCell group relative overflow-hidden rounded-2xl bg-white/[0.03] px-2.5 py-2 ring-1 ring-white/10 text-left transition hover:bg-white/[0.06] active:scale-[0.99] ${
+                !inMonth ? 'opacity-45' : ''
+              } ${isSelected ? 'ring-violet-400/35 shadow-[0_0_0_1px_rgba(167,139,250,0.25),_0_12px_28px_rgba(167,139,250,0.10)]' : ''}"
+              title="${escapeHtml(ymdLabel(ymd))}"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div class="text-xs font-semibold tabular-nums ${isToday ? 'text-neon-gold' : 'text-slate-200'}">${d}</div>
+                ${
+                  total > 0
+                    ? `<div class="text-[10px] tabular-nums text-slate-300/70">${done}/${total}</div>`
+                    : `<div class="text-[10px] text-slate-300/40">·</div>`
+                }
+              </div>
+              ${weatherLine}
+              <div class="mt-1 flex flex-wrap gap-1">
+                ${total > 0 ? `<span class="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400/70"></span>` : ''}
+                ${microCount(ymd) > 0 ? `<span class="inline-flex h-1.5 w-1.5 rounded-full bg-violet-400/70"></span>` : ''}
+              </div>
+            </button>
+          `);
+        }
+
+        el.calendarGrid.innerHTML = cells.join('');
+        el.calendarGrid.querySelectorAll('.calCell').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const ymd = btn.getAttribute('data-ymd');
+            if (!ymd) return;
+            setSelectedDate(ymd);
+          });
+        });
+        lucide.createIcons();
+      }
+
+      function renderDayTasks() {
+        const ymd = calendar.selectedYMD || toYMD(new Date());
+        el.selectedDateLabel.textContent = ymdLabel(ymd);
+        const list = tasksForDate(ymd);
+        el.dayTaskEmpty.classList.toggle('hidden', list.length !== 0);
+
+        el.dayTaskList.innerHTML = list
+          .map((t) => {
+            return `
+              <div class="group flex items-start gap-2 rounded-3xl bg-white/[0.03] px-3 py-3 ring-1 ring-white/10 hover:bg-white/[0.05] transition">
+                <button
+                  data-toggle-task="${t.id}"
+                  class="mt-0.5 grid h-6 w-6 place-items-center rounded-2xl ring-1 ring-white/10 ${
+                    t.done ? 'bg-emerald-400/80 text-emerald-950 shadow-glowE' : 'bg-white/5 text-slate-200'
+                  } transition active:scale-[0.99]"
+                  title="完成 / 取消完成"
+                >
+                  <i data-lucide="${t.done ? 'check' : 'circle'}" class="h-4 w-4"></i>
+                </button>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <div class="truncate text-sm font-semibold ${t.done ? 'text-slate-300/60 line-through' : 'text-slate-100'}">${escapeHtml(
+                        t.title
+                      )}</div>
+                      <div class="mt-0.5 text-[11px] text-slate-300/70 tabular-nums">
+                        ${t.time ? `${escapeHtml(t.time)} · ` : ''}${escapeHtml(String(t.durationMin))} 分钟
+                        ${t.notes ? ` · ${escapeHtml(t.notes).slice(0, 30)}${t.notes.length > 30 ? '…' : ''}` : ''}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                      <button data-edit-task="${t.id}" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+
+        el.dayTaskList.querySelectorAll('[data-toggle-task]').forEach((btn) => {
+          btn.addEventListener('click', () => toggleTaskDone(btn.getAttribute('data-toggle-task')));
+        });
+        el.dayTaskList.querySelectorAll('[data-edit-task]').forEach((btn) => {
+          btn.addEventListener('click', () => openTaskModal(btn.getAttribute('data-edit-task')));
+        });
+
+        lucide.createIcons();
+        renderProgress();
+      }
+
+      function openTaskModal(taskId) {
+        editingTaskId = taskId || null;
+        const ymd = calendar.selectedYMD || toYMD(new Date());
+        const task = editingTaskId ? state.tasks.find((t) => t.id === editingTaskId) : null;
+
+        el.taskModalTitle.textContent = task ? '编辑任务' : '新增任务';
+        el.taskDeleteBtn.classList.toggle('hidden', !task);
+
+        el.taskTitleInput.value = task ? task.title : '';
+        el.taskDateInput.value = task ? task.date : ymd;
+        el.taskTimeInput.value = task ? task.time : '';
+        el.taskDurationInput.value = String(task ? task.durationMin : 20);
+        el.taskNotesInput.value = task ? task.notes : '';
+
+        el.taskModal.classList.remove('hidden');
+        lucide.createIcons();
+        setTimeout(() => el.taskTitleInput.focus(), 50);
+      }
+
+      function closeTaskModal() {
+        el.taskModal.classList.add('hidden');
+        editingTaskId = null;
+      }
+
+      function saveTaskFromModal() {
+        const title = String(el.taskTitleInput.value || '').trim();
+        const date = String(el.taskDateInput.value || '').trim();
+        if (!title) {
+          toast('任务标题不能为空（可以很短，比如：截图）。', 'warn');
+          return;
+        }
+        if (!date) {
+          toast('请选择日期。', 'warn');
+          return;
+        }
+        const time = String(el.taskTimeInput.value || '').trim();
+        const durationMin = Math.max(1, Math.round(Number(el.taskDurationInput.value || 20)));
+        const notes = String(el.taskNotesInput.value || '').trim();
+
+        if (editingTaskId) {
+          const task = state.tasks.find((t) => t.id === editingTaskId);
+          if (!task) return;
+          task.title = title;
+          task.date = date;
+          task.time = time;
+          task.durationMin = durationMin;
+          task.notes = notes;
+          task.updatedAt = now();
+        } else {
+          state.tasks.push({
+            id: uid(),
+            title,
+            date,
+            time,
+            durationMin,
+            notes,
+            done: false,
+            createdAt: now(),
+            updatedAt: now(),
+          });
+        }
+        save();
+        closeTaskModal();
+        // jump calendar view if needed
+        const dt = fromYMD(date);
+        calendar.viewYear = dt.getFullYear();
+        calendar.viewMonth = dt.getMonth();
+        setSelectedDate(date);
+        toast('任务已保存。', 'good');
+      }
+
+      function deleteTaskById(taskId) {
+        const idx = state.tasks.findIndex((t) => t.id === taskId);
+        if (idx === -1) return;
+        state.tasks.splice(idx, 1);
+        save();
+        toast('已删除任务。', 'default');
+        renderCalendar();
+        renderDayTasks();
+      }
+
+      function toggleTaskDone(taskId) {
+        const task = state.tasks.find((t) => t.id === taskId);
+        if (!task) return;
+        task.done = !task.done;
+        task.updatedAt = now();
+        save();
+        renderCalendar();
+        renderDayTasks();
+        if (task.done) toast('完成 +1：你在推进宇宙。', 'good');
+      }
+
+      function renderInboxEverywhere() {
+        const count = state.inbox.length;
+        if (count > 0) {
+          el.inboxBadge.textContent = String(count);
+          el.inboxBadge.classList.remove('hidden');
+        } else {
+          el.inboxBadge.classList.add('hidden');
+        }
+
+        // preview list
+        const top = state.inbox.slice(0, 3);
+        el.inboxPreviewEmpty.classList.toggle('hidden', top.length !== 0);
+        el.inboxPreviewList.innerHTML = top
+          .map((x) => {
+            return `
+              <div class="rounded-3xl bg-white/[0.03] px-3 py-3 ring-1 ring-white/10">
+                <div class="text-sm font-semibold text-slate-100 truncate">${escapeHtml(x.title)}</div>
+                <div class="mt-0.5 text-[11px] text-slate-300/70 tabular-nums">
+                  ${x.date ? `${escapeHtml(x.date)}${x.time ? ` ${escapeHtml(x.time)}` : ''} · ` : ''}${escapeHtml(String(x.durationMin))} 分钟
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      function renderInboxModal() {
+        el.inboxEmpty.classList.toggle('hidden', state.inbox.length !== 0);
+        el.inboxList.innerHTML = state.inbox
+          .map((x) => {
+            return `
+              <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4">
+                <div class="grid gap-3 lg:grid-cols-[1fr_170px_130px_120px_auto] lg:items-end">
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">标题</span>
+                    <input data-inbox-id="${x.id}" data-field="title" value="${escapeHtml(x.title)}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">日期</span>
+                    <input data-inbox-id="${x.id}" data-field="date" type="date" value="${escapeHtml(x.date || '')}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">时间</span>
+                    <input data-inbox-id="${x.id}" data-field="time" type="time" value="${escapeHtml(x.time || '')}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">分钟</span>
+                    <input data-inbox-id="${x.id}" data-field="durationMin" type="number" min="1" max="480" step="1" value="${escapeHtml(
+                      String(x.durationMin || 20)
+                    )}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <div class="flex items-center gap-2 justify-end">
+                    <button data-schedule-inbox="${x.id}" class="inline-flex items-center gap-2 rounded-2xl bg-emerald-400/80 px-3 py-2 text-xs font-semibold text-emerald-950 shadow-glowE hover:brightness-110 transition">
+                      <i data-lucide="calendar-plus" class="h-4 w-4"></i>
+                      加入日历
+                    </button>
+                    <button data-delete-inbox="${x.id}" class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition">
+                      <i data-lucide="trash-2" class="h-4 w-4"></i>
+                    </button>
+                  </div>
+                </div>
+                <label class="mt-3 grid gap-1">
+                  <span class="text-[11px] text-slate-300/70">备注</span>
+                  <textarea data-inbox-id="${x.id}" data-field="notes" rows="2" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40">${escapeHtml(
+                    x.notes || ''
+                  )}</textarea>
+                </label>
+              </div>
+            `;
+          })
+          .join('');
+        lucide.createIcons();
+      }
+
+      function openInboxModal() {
+        el.inboxModal.classList.remove('hidden');
+        renderInboxModal();
+        lucide.createIcons();
+      }
+
+      function closeInboxModal() {
+        el.inboxModal.classList.add('hidden');
+      }
+
+      function deleteInboxItem(id) {
+        const idx = state.inbox.findIndex((x) => x.id === id);
+        if (idx === -1) return;
+        state.inbox.splice(idx, 1);
+        save();
+        renderInboxEverywhere();
+        renderInboxModal();
+      }
+
+      function scheduleInboxItem(id) {
+        const item = state.inbox.find((x) => x.id === id);
+        if (!item) return;
+        const today = toYMD(new Date());
+        const date = item.date || addDays(today, 1);
+        state.tasks.push({
+          id: uid(),
+          title: String(item.title || '长期任务'),
+          date,
+          time: item.time || '',
+          durationMin: Math.max(1, Math.round(Number(item.durationMin || 20))),
+          notes: item.notes || '',
+          done: false,
+          createdAt: now(),
+          updatedAt: now(),
+        });
+        deleteInboxItem(id);
+        save();
+        // update calendar view & selection
+        const dt = fromYMD(date);
+        calendar.viewYear = dt.getFullYear();
+        calendar.viewMonth = dt.getMonth();
+        setSelectedDate(date);
+        toast('已加入日历。', 'good');
+      }
+
+      function addManualInboxItem() {
+        state.inbox.unshift({
+          id: uid(),
+          title: '一个未来任务（手动）',
+          notes: '',
+          date: '',
+          time: '',
+          durationMin: 20,
+          createdAt: now(),
+          source: 'manual',
+        });
+        save();
+        renderInboxEverywhere();
+        renderInboxModal();
+        toast('已添加。改一改，然后加入日历。', 'good');
+      }
+
+      function weatherCodeMeta(code) {
+        const c = Number(code);
+        if (c === 0) return { text: '晴', icon: 'sun', emoji: '☀️', bg: 'linear-gradient(90deg, rgba(245,208,111,0.22), rgba(255,255,255,0.04), rgba(167,139,250,0.10))' };
+        if (c >= 1 && c <= 3)
+          return { text: '多云', icon: 'cloud-sun', emoji: '🌤️', bg: 'linear-gradient(90deg, rgba(103,232,249,0.18), rgba(255,255,255,0.04), rgba(167,139,250,0.10))' };
+        if (c === 45 || c === 48)
+          return { text: '雾', icon: 'cloud-fog', emoji: '🌫️', bg: 'linear-gradient(90deg, rgba(148,163,184,0.18), rgba(255,255,255,0.03), rgba(148,163,184,0.10))' };
+        if (c >= 51 && c <= 57)
+          return { text: '毛毛雨', icon: 'cloud-drizzle', emoji: '🌦️', bg: 'linear-gradient(90deg, rgba(103,232,249,0.16), rgba(255,255,255,0.03), rgba(52,211,153,0.10))' };
+        if (c >= 61 && c <= 67)
+          return { text: '下雨', icon: 'cloud-rain', emoji: '🌧️', bg: 'linear-gradient(90deg, rgba(103,232,249,0.18), rgba(255,255,255,0.03), rgba(52,211,153,0.10))' };
+        if (c >= 71 && c <= 77)
+          return { text: '下雪', icon: 'cloud-snow', emoji: '❄️', bg: 'linear-gradient(90deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03), rgba(103,232,249,0.10))' };
+        if (c >= 80 && c <= 82)
+          return { text: '阵雨', icon: 'cloud-rain', emoji: '🌧️', bg: 'linear-gradient(90deg, rgba(103,232,249,0.18), rgba(255,255,255,0.03), rgba(167,139,250,0.10))' };
+        if (c >= 95)
+          return { text: '雷暴', icon: 'cloud-lightning', emoji: '⛈️', bg: 'linear-gradient(90deg, rgba(167,139,250,0.18), rgba(255,255,255,0.03), rgba(245,208,111,0.10))' };
+        return { text: '天气', icon: 'cloud', emoji: '🌡️', bg: 'linear-gradient(90deg, rgba(148,163,184,0.16), rgba(255,255,255,0.03), rgba(148,163,184,0.10))' };
+      }
+
+      async function fetchTodayWeather(lat, lon) {
+        const url =
+          `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}` +
+          `&longitude=${encodeURIComponent(lon)}` +
+          `&current=temperature_2m,weather_code&timezone=auto`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`天气 HTTP ${res.status}`);
+        const data = await res.json();
+        const temp = data?.current?.temperature_2m;
+        const code = data?.current?.weather_code;
+        if (temp == null || code == null) throw new Error('天气数据缺失');
+        const meta = weatherCodeMeta(code);
+        return { temp: Math.round(Number(temp)), code: Number(code), ...meta };
+      }
+
+      async function initWeatherAuto() {
+        const canGeo = typeof navigator !== 'undefined' && navigator.geolocation;
+        if (!canGeo) return;
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            try {
+              const lat = pos.coords.latitude;
+              const lon = pos.coords.longitude;
+              state.weather.lat = lat;
+              state.weather.lon = lon;
+              const w = await fetchTodayWeather(lat, lon);
+              state.weather.today = {
+                temp: w.temp,
+                code: w.code,
+                icon: w.icon,
+                emoji: w.emoji || '🌤️',
+                short: `${(w.emoji || '🌤️')} ${w.temp}°`,
+                text: `${(w.emoji || '🌤️')} ${w.text} · ${w.temp}°C`,
+                bg: w.bg || '',
+              };
+              state.weather.fetchedAt = now();
+              save();
+              renderWeatherUI();
+              renderCalendar();
+            } catch (err) {
+              toast(`天气获取失败：${String(err?.message || err)}`, 'warn');
+            }
+          },
+          () => {
+            // 用户拒绝定位：静默一点，只提示一次
+            toast('未开启定位：今日天气将不显示。', 'default');
+          },
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 30 * 60 * 1000 }
+        );
+      }
+
+      function renderWeatherUI() {
+        if (state.weather?.today) {
+          el.todayWeatherPill.classList.remove('hidden');
+          el.todayWeatherText.textContent = `今日天气：${state.weather.today.text}`;
+          if (state.weather.today.bg) el.todayWeatherPill.style.backgroundImage = state.weather.today.bg;
+          // lucide 会把 <i> 替换成 <svg>，所以这里用“重建节点”的方式更新图标
+          const iconName = state.weather.today.icon || 'cloud';
+          const holder = document.getElementById('todayWeatherIcon');
+          if (holder) {
+            holder.outerHTML = `<i id="todayWeatherIcon" data-lucide="${escapeHtml(iconName)}" class="h-4 w-4 text-neon-emerald"></i>`;
+            el.todayWeatherIcon = document.getElementById('todayWeatherIcon');
+          }
+          lucide.createIcons();
+        } else {
+          el.todayWeatherPill.classList.add('hidden');
+        }
+      }
+
+      function simulateDeconstruction(idea) {
+        const t = tagMeta(idea.tag);
+        const text = idea.text;
+        const d = Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60);
+
+        const templates = {
+          crazy: [
+            (x) => `目标：${x}\n今日微动：花 ${d} 分钟把它改写成一句“标题 + 10字描述”，并保存到备忘录。`,
+            (x) => `目标：${x}\n今日微动：用 ${d} 分钟写一个“最差版本”的开头（允许烂、允许怪）。`,
+            (x) => `目标：${x}\n今日微动：用 ${d} 分钟画一个丑到想笑的草图（拍照/截图即可）。`,
+          ],
+          money: [
+            (x) => `目标：${x}\n今日微动：花 ${d} 分钟去小红书/谷歌搜 3 个同类爆款案例并截图。`,
+            (x) => `目标：${x}\n今日微动：写下 3 个可能的付费点（哪怕离谱也行），别解释。`,
+            (x) => `目标：${x}\n今日微动：列 3 个“最容易卖”的受众画像：他们此刻最怕什么？`,
+          ],
+          think: [
+            (x) => `目标：${x}\n今日微动：把它拆成 3 个子问题，每个只写 1 句答案。`,
+            (x) => `目标：${x}\n今日微动：用 ${d} 分钟找 1 个反例：它为什么可能完全行不通？写下来就好。`,
+            (x) => `目标：${x}\n今日微动：给它写一句“如果只做最小可验证证据，我要看到什么？”`,
+          ],
+          mono: [
+            (x) => `目标：${x}\n今日微动：用 ${d} 分钟写一段独白：我为什么在意它？（不许改稿）`,
+            (x) => `目标：${x}\n今日微动：给它写一封 60 秒的“未来邮件”——假装它已经发生。`,
+            (x) => `目标：${x}\n今日微动：写下 3 个情绪词：它带给我什么感觉？别分析原因。`,
+          ],
+        };
+
+        const pool = templates[idea.tag] || [
+          (x) => `目标：${x}\n今日微动：用 ${d} 分钟写 3 条“最烂也没关系”的要点。`,
+          (x) => `目标：${x}\n今日微动：花 ${d} 分钟找 1 个参考截图/链接，保存起来就算赢。`,
+          (x) => `目标：${x}\n今日微动：做一个最小证据：写一句标题 + 一个按钮文案。`,
+        ];
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const action = pick(text.length > 30 ? text.slice(0, 30) + '…' : text);
+
+        // small “smart” twist: if contains url/app keywords
+        const lower = text.toLowerCase();
+        const hasSearch = /小红书|google|谷歌|b站|bilibili|抖音|twitter|x\.com|youtube/i.test(text);
+        const hasWrite = /写|文案|脚本|稿|文章|标题|故事/.test(text);
+        const hasBuild = /做|开发|页面|app|产品|功能|插件|工具|网站/.test(lower) || /开发|网页|组件|代码|原型/.test(text);
+
+        let extra = '';
+        if (hasSearch && idea.tag !== 'money') extra = '\n加速器：只截图，不评论。';
+        else if (hasWrite) extra = '\n加速器：禁止回看上一句。';
+        else if (hasBuild) extra = '\n加速器：只做“能动的最丑按钮”。';
+        else extra = '\n加速器：先做 1 个证据，再允许你继续想。';
+
+        return `${t.emoji} ${t.label}\n${action}${extra}`;
+      }
+
+      function aiReady() {
+        return Boolean(state.ai?.enabled) && Boolean(String(state.ai?.apiKey || '').trim());
+      }
+
+      async function deepseekChat(messages, { temperature = 0.8, maxTokens = 220 } = {}) {
+        if (!aiReady()) throw new Error('AI 未启用或缺少 API Key');
+        const base = String(state.ai.baseUrl || '').replace(/\/$/, '');
+        const url = `${base}/chat/completions`;
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${String(state.ai.apiKey).trim()}`,
+            },
+            body: JSON.stringify({
+              model: String(state.ai.model || 'deepseek-chat'),
+              messages,
+              temperature,
+              max_tokens: maxTokens,
+            }),
+            signal: controller.signal,
+          });
+          if (!res.ok) {
+            const txt = await res.text().catch(() => '');
+            throw new Error(`HTTP ${res.status} ${txt ? `· ${txt.slice(0, 160)}` : ''}`);
+          }
+          const data = await res.json();
+          const content = data?.choices?.[0]?.message?.content;
+          if (!content) throw new Error('AI 返回为空');
+          return String(content).trim();
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
+      async function aiDeconstruct(idea) {
+        const t = tagMeta(idea.tag);
+        const durationMin = Math.round(state.ui.durationSec / 60);
+        const system =
+          '你是一个极简、情绪友好、反完美主义的“微行动教练”。用户有拖延与ADHD倾向，需要把灵感拆成可立即开始的微动作。输出必须是中文，语气温柔、带一点玄学/仪式感，不要长篇大论。';
+        const user = [
+          `灵感标签：${t.emoji} ${t.label}`,
+          `灵感原文：${idea.text}`,
+          '',
+          `请把它拆成一个 ${durationMin} 分钟以内、可立刻开始的“垃圾草稿”行动。`,
+          '输出格式严格为三行：',
+          '1) 目标：…',
+          '2) 今日微动：…（必须具体到可执行）',
+          '3) 加速器：…（一句话，帮用户更快开始）',
+          '每行尽量短。不要使用markdown。不要编号。不要额外解释。',
+        ].join('\n');
+
+        return deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.85, maxTokens: 220 }
+        );
+      }
+
+      async function aiMashup(a, b) {
+        const system =
+          '你是一个天才但克制的“灵感乱炖”助手：把两个想法融合成一个有趣但可落地的怪物项目，并给出一个立刻能做的微动作。输出中文，短、好玩、但不要夸张到不可执行。';
+        const durationMin = Math.round(state.ui.durationSec / 60);
+        const user = [
+          `想法A：${a.text}`,
+          `想法B：${b.text}`,
+          '',
+          `请输出两段：`,
+          `第一段：一句“乱炖项目名/方向”（不超过25字）`,
+          `第二段：一个 ${durationMin} 分钟以内的微动作（必须具体到可以立刻做）`,
+          `不要使用markdown。不要引用符号。`,
+        ].join('\n');
+
+        return deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.9, maxTokens: 180 }
+        );
+      }
+
+      function tryExtractJsonArray(text) {
+        const s = String(text || '').trim();
+        // direct parse
+        const direct = safeJsonParse(s, null);
+        if (Array.isArray(direct)) return direct;
+        // try extract first [...] block
+        const m = s.match(/\[[\s\S]*\]/);
+        if (m) {
+          const arr = safeJsonParse(m[0], null);
+          if (Array.isArray(arr)) return arr;
+        }
+        return null;
+      }
+
+      function localSuggestLongTasks(idea, actionText) {
+        const today = toYMD(new Date());
+        const baseTitle = idea?.text ? idea.text.slice(0, 14) + (idea.text.length > 14 ? '…' : '') : '这个方向';
+        return [
+          {
+            title: `收集 10 个参考：${baseTitle}`,
+            notes: '只收集，不评价：截图/链接都行。',
+            date: addDays(today, 1),
+            time: '',
+            durationMin: 25,
+          },
+          {
+            title: `做一个最丑原型：${baseTitle}`,
+            notes: '只做一个能点的界面或一页说明。',
+            date: addDays(today, 3),
+            time: '',
+            durationMin: 45,
+          },
+          {
+            title: `写 1 页计划（允许烂）：${baseTitle}`,
+            notes: '目标/受众/验证方式 各写一行。',
+            date: addDays(today, 7),
+            time: '',
+            durationMin: 30,
+          },
+          {
+            title: `约束下一步：把它拆成 3 个里程碑`,
+            notes: '每个里程碑只要一个“可见证据”。',
+            date: '',
+            time: '',
+            durationMin: 20,
+          },
+        ];
+      }
+
+      async function aiSuggestLongTasks(idea, actionText) {
+        const system =
+          '你是一个极简但很会推进的“长期任务策划助手”。你需要把一个已完成的微行动，扩展成未来可安排进日历的长期任务候选。输出必须是严格 JSON 数组，不要任何多余文字。';
+        const today = toYMD(new Date());
+        const user = [
+          `今天日期：${today}`,
+          `灵感：${idea?.text || ''}`,
+          `微行动：${actionText || ''}`,
+          '',
+          '请生成 4 个“未来长期任务候选”，用于日历安排。',
+          '要求：',
+          '1) 每个任务是一个对象，字段严格为：title, notes, date, time, durationMin',
+          '2) title：简短可执行（<= 18字）',
+          '3) notes：一句话提示（<= 28字）',
+          '4) date：可为空字符串；如果给日期，请优先给未来 1~14 天内的 YYYY-MM-DD',
+          '5) time：可为空字符串；如果给时间请用 HH:MM（24小时制）',
+          '6) durationMin：整数分钟（10~120 之间）',
+          '只输出 JSON 数组。不要 markdown。不要注释。不要解释。',
+        ].join('\n');
+
+        const out = await deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.75, maxTokens: 320 }
+        );
+
+        const arr = tryExtractJsonArray(out);
+        if (!arr) throw new Error('AI 输出不是可解析 JSON');
+
+        return arr
+          .filter((x) => x && typeof x === 'object')
+          .slice(0, 6)
+          .map((x) => ({
+            title: String(x.title || '长期任务候选').slice(0, 40),
+            notes: String(x.notes || '').slice(0, 200),
+            date: x.date ? String(x.date) : '',
+            time: x.time ? String(x.time) : '',
+            durationMin: Math.max(10, Math.min(120, Math.round(Number(x.durationMin || 20)))),
+          }));
+      }
+
+      function isValidYMD(s) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(s))) return false;
+        const dt = fromYMD(s);
+        return toYMD(dt) === s;
+      }
+
+      function normalizeDateMaybe(s, fallbackYMD) {
+        const raw = String(s || '').trim();
+        if (isValidYMD(raw)) return raw;
+        // support MM-DD / M-D -> assume current year
+        const m = raw.match(/^(\d{1,2})-(\d{1,2})$/);
+        if (m) {
+          const y = new Date().getFullYear();
+          const mm = String(Number(m[1])).padStart(2, '0');
+          const dd = String(Number(m[2])).padStart(2, '0');
+          const ymd = `${y}-${mm}-${dd}`;
+          return isValidYMD(ymd) ? ymd : fallbackYMD;
+        }
+        return fallbackYMD;
+      }
+
+      function localParseTaskFromText(text, fallbackYMD) {
+        const s = String(text || '').trim();
+        // date
+        const dateMatch =
+          s.match(/\b(\d{4}-\d{1,2}-\d{1,2})\b/) ||
+          s.match(/\b(\d{1,2}-\d{1,2})\b/) ||
+          s.match(/(今天|明天|后天)/);
+        let date = fallbackYMD;
+        if (dateMatch) {
+          if (dateMatch[1]) date = normalizeDateMaybe(dateMatch[1].replace(/-(\d)\b/g, '-0$1'), fallbackYMD);
+          else if (dateMatch[0] === '今天') date = toYMD(new Date());
+          else if (dateMatch[0] === '明天') date = addDays(toYMD(new Date()), 1);
+          else if (dateMatch[0] === '后天') date = addDays(toYMD(new Date()), 2);
+        }
+        // time
+        const timeMatch = s.match(/\b(\d{1,2}):(\d{2})\b/);
+        const time = timeMatch ? `${String(Number(timeMatch[1])).padStart(2, '0')}:${timeMatch[2]}` : '';
+        // duration
+        let durationMin = 20;
+        const durMatch = s.match(/(\d{1,3})\s*(分钟|min)/i) || s.match(/(\d{1,2})\s*(小时|h)/i);
+        if (durMatch) {
+          const n = Number(durMatch[1]);
+          if (/小时|h/i.test(durMatch[0])) durationMin = Math.max(10, Math.min(240, n * 60));
+          else durationMin = Math.max(5, Math.min(240, n));
+        }
+        // title: first sentence trimmed
+        const title = (s.split(/\n|。|！|!|？|\?/)[0] || s).slice(0, 28).trim() || '一个任务';
+        return {
+          title,
+          date,
+          time,
+          durationMin,
+          notes: s.length > 28 ? s : '',
+          encouragement: '已入历。你不需要完美，你只需要出现。',
+        };
+      }
+
+      async function aiParseTaskFromVoid(text, fallbackYMD) {
+        const system =
+          '你是一个极简但超会落地的“日历任务拆解助手”。用户可能会写：要做什么、什么时候做、在哪做、需要多久。你的任务是提炼成一个可加入日历的任务。输出必须是中文。';
+        const user = [
+          `今天日期：${toYMD(new Date())}`,
+          `默认日期（若未提到日期就用它）：${fallbackYMD}`,
+          '',
+          '请从下面这段输入里提取 1 个任务，并输出严格 JSON：',
+          '{"title":"...","date":"YYYY-MM-DD","time":"HH:MM或空","durationMin":整数(5~240),"notes":"...","encouragement":"一句鼓励话"}',
+          '',
+          '规则：',
+          '1) date 必须是 YYYY-MM-DD；如果用户没写日期，使用默认日期。',
+          '2) time 可为空；如果用户没写时间就留空。',
+          '3) durationMin 给一个合理估计；用户没写就给 20。',
+          '4) notes 放“在哪做/怎么做/关键限制”等信息；不要过长。',
+          '5) encouragement 必须是一句短短的鼓励话，不要鸡汤长文。',
+          '只输出 JSON，不要 markdown，不要解释。',
+          '',
+          `输入：${String(text || '').trim()}`,
+        ].join('\n');
+
+        const out = await deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.5, maxTokens: 220 }
+        );
+
+        const obj = safeJsonParse(out, null) || safeJsonParse((out.match(/\{[\s\S]*\}/) || [])[0] || '', null);
+        if (!obj || typeof obj !== 'object') throw new Error('AI 输出不是可解析 JSON');
+        const title = String(obj.title || '').trim();
+        if (!title) throw new Error('AI title 为空');
+        const date = normalizeDateMaybe(obj.date, fallbackYMD);
+        const time = String(obj.time || '').trim();
+        const durationMin = Math.max(5, Math.min(240, Math.round(Number(obj.durationMin || 20))));
+        const notes = String(obj.notes || '').trim().slice(0, 240);
+        const encouragement = String(obj.encouragement || '已入历。你只需要开始。').trim().slice(0, 60);
+        return { title: title.slice(0, 40), date, time, durationMin, notes, encouragement };
+      }
+
+      async function taskifyVoidToCalendar() {
+        const text = String(el.ideaInput.value || '').trim();
+        if (!text) {
+          toast('先写一句话，再点“入历”。', 'warn');
+          return;
+        }
+        const fallbackYMD = calendar?.selectedYMD || toYMD(new Date());
+
+        // ghost anim
+        const rect = el.ideaInput.getBoundingClientRect();
+        const ghost = document.createElement('div');
+        ghost.className =
+          'fixed z-50 max-w-[520px] rounded-3xl bg-white/10 ring-1 ring-white/10 px-4 py-3 text-sm text-slate-100/90 backdrop-blur shadow-soft animate-launch';
+        ghost.style.left = `${Math.min(rect.left + 18, window.innerWidth - 560)}px`;
+        ghost.style.top = `${rect.top + 12}px`;
+        ghost.style.width = `${Math.min(rect.width - 36, 520)}px`;
+        ghost.innerHTML = `<div class="text-xs text-slate-300/70 mb-1">📅 入历</div><div class="line-clamp-3">${escapeHtml(text)}</div>`;
+        document.body.appendChild(ghost);
+        setTimeout(() => ghost.remove(), 340);
+
+        try {
+          toast(aiReady() ? 'AI 正在把它变成任务…（DeepSeek）' : '正在把它变成任务…', 'purple');
+          const parsed = aiReady() ? await aiParseTaskFromVoid(text, fallbackYMD) : localParseTaskFromText(text, fallbackYMD);
+
+          const task = {
+            id: uid(),
+            title: parsed.title,
+            date: parsed.date,
+            time: parsed.time || '',
+            durationMin: parsed.durationMin,
+            notes: parsed.notes || '',
+            done: false,
+            createdAt: now(),
+            updatedAt: now(),
+          };
+          state.tasks.push(task);
+          save();
+
+          // jump to date
+          const dt = fromYMD(task.date);
+          calendar.viewYear = dt.getFullYear();
+          calendar.viewMonth = dt.getMonth();
+          setSelectedDate(task.date);
+          renderCalendar();
+          renderDayTasks();
+          renderProgress();
+
+          el.ideaInput.value = '';
+          el.charCount.textContent = '0';
+
+          toast(parsed.encouragement || '已入历。你只需要开始。', 'good');
+        } catch (err) {
+          // fallback: open task modal prefilled
+          toast(`入历失败，已为你打开手动任务：${String(err?.message || err)}`, 'warn');
+          openTaskModal(null);
+          el.taskTitleInput.value = text.slice(0, 40);
+          el.taskNotesInput.value = text;
+          el.taskDateInput.value = fallbackYMD;
+          el.taskDurationInput.value = '20';
+        }
+      }
+
+      async function generateInboxFromMicroAction() {
+        const idea = selectedIdeaId ? state.ideas.find((x) => x.id === selectedIdeaId) : null;
+        const actionText = String(el.actionText.textContent || '').trim();
+
+        try {
+          const suggestions = aiReady() ? await aiSuggestLongTasks(idea, actionText) : localSuggestLongTasks(idea, actionText);
+          const items = (suggestions || []).map((s) => ({
+            id: uid(),
+            title: s.title,
+            notes: s.notes || '',
+            date: s.date || '',
+            time: s.time || '',
+            durationMin: Math.max(1, Math.round(Number(s.durationMin || 20))),
+            createdAt: now(),
+            source: aiReady() ? 'ai' : 'local',
+          }));
+          if (items.length) {
+            state.inbox.unshift(...items);
+            save();
+            renderInboxEverywhere();
+            toast(`已生成 ${items.length} 个长期任务候选 → 已放入收集箱。`, 'good');
+          }
+        } catch (err) {
+          const fallback = localSuggestLongTasks(idea, actionText).map((s) => ({
+            id: uid(),
+            title: s.title,
+            notes: s.notes || '',
+            date: s.date || '',
+            time: s.time || '',
+            durationMin: Math.max(1, Math.round(Number(s.durationMin || 20))),
+            createdAt: now(),
+            source: 'local',
+          }));
+          state.inbox.unshift(...fallback);
+          save();
+          renderInboxEverywhere();
+          toast(`长期任务生成失败，已回退本地模板：${String(err?.message || err)}`, 'warn');
+        }
+      }
+
+      function selectIdea(id) {
+        const idea = state.ideas.find((x) => x.id === id);
+        if (!idea) return;
+        selectedIdeaId = id;
+        const t = tagMeta(idea.tag);
+
+        el.selectedIdeaTitle.textContent = idea.text.length > 48 ? idea.text.slice(0, 48) + '…' : idea.text;
+        el.selectedTagPill.classList.remove('hidden');
+        el.selectedTagPill.textContent = `${t.emoji} ${t.label}`;
+        el.actionText.textContent = aiReady() ? 'AI 正在拆解…（DeepSeek）' : simulateDeconstruction(idea);
+
+        // UI buttons
+        el.startBtn.disabled = true; // 等拆解结束再允许开始（更像“点星星就得到指令”）
+        el.completeBtn.classList.add('hidden');
+        el.resetBtn.classList.add('hidden');
+        el.endEarlyBtn.classList.add('hidden');
+
+        // stop any running timer
+        stopTimer();
+        setTimerUI(state.ui.durationSec, '待机', state.ui.durationSec);
+
+        // subtle highlight
+        highlightIdeaCard(id);
+
+        // async deconstruction (AI preferred)
+        const token = uid();
+        deconstructReqToken = token;
+        (async () => {
+          try {
+            const text = aiReady() ? await aiDeconstruct(idea) : simulateDeconstruction(idea);
+            if (deconstructReqToken !== token) return;
+            if (selectedIdeaId !== idea.id) return;
+            el.actionText.textContent = text;
+          } catch (err) {
+            if (deconstructReqToken !== token) return;
+            el.actionText.textContent = simulateDeconstruction(idea);
+            toast(`DeepSeek 调用失败，已回退本地模拟：${String(err?.message || err)}`, 'warn');
+          } finally {
+            if (deconstructReqToken !== token) return;
+            if (selectedIdeaId === idea.id) el.startBtn.disabled = false;
+          }
+        })();
+      }
+
+      function highlightIdeaCard(id) {
+        const node = el.ideaList.querySelector(`[data-idea-id="${CSS.escape(id)}"]`);
+        if (!node) return;
+        node.classList.add('animate-highlight');
+        setTimeout(() => node.classList.remove('animate-highlight'), 700);
+      }
+
+      function resetActionPanel() {
+        selectedIdeaId = null;
+        el.selectedIdeaTitle.textContent = '还没有选中星星';
+        el.selectedTagPill.classList.add('hidden');
+        el.actionText.textContent = `点击左侧任意灵感，让它立刻变成一个“${Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60)}分钟微动”。`;
+        el.startBtn.disabled = true;
+        el.completeBtn.classList.add('hidden');
+        el.resetBtn.classList.add('hidden');
+        stopTimer();
+        setTimerUI(state.ui.durationSec, '待机', state.ui.durationSec);
+      }
+
+      function setTimerUI(remainingSec, label, totalSec) {
+        el.timeLeft.textContent = fmtTimeLeft(remainingSec);
+        el.timerState.textContent = label;
+        const base = Math.max(1, Number(totalSec || state.ui.durationSec || DEFAULT_DURATION_SEC));
+        const progress = Math.max(0, Math.min(1, remainingSec / base));
+        el.ring.style.strokeDashoffset = String(CIRC * (1 - progress));
+      }
+
+      function startTimer() {
+        if (!selectedIdeaId) return;
+        if (timer.running) return;
+
+        timer.running = true;
+        timer.totalSec = Number(state.ui.durationSec || DEFAULT_DURATION_SEC);
+        timer.endAt = now() + timer.totalSec * 1000;
+        el.trashBanner.classList.remove('hidden');
+        el.ringGlow.classList.remove('hidden');
+        el.timerState.textContent = 'Trash Mode';
+        el.startBtn.disabled = true;
+        el.completeBtn.classList.add('hidden');
+        el.resetBtn.classList.add('hidden');
+        el.endEarlyBtn.classList.remove('hidden');
+
+        toast('开始！现在这段时间里，你的任务是：产出一坨“能看见的垃圾”。', 'good');
+
+        const tick = () => {
+          if (!timer.running) return;
+          const remainMs = timer.endAt - now();
+          const remainSec = Math.ceil(remainMs / 1000);
+          setTimerUI(remainSec, 'Trash Mode', timer.totalSec);
+
+          if (remainMs <= 0) {
+            finishTimer(false);
+            return;
+          }
+          timer.raf = requestAnimationFrame(tick);
+        };
+        timer.raf = requestAnimationFrame(tick);
+      }
+
+      function finishTimer(early) {
+        stopTimer();
+        el.trashBanner.classList.add('hidden');
+        el.timerState.textContent = '完成';
+        el.completeBtn.classList.remove('hidden');
+        el.resetBtn.classList.remove('hidden');
+        el.endEarlyBtn.classList.add('hidden');
+        el.ringGlow.classList.add('hidden');
+        setTimerUI(0, '完成', timer.totalSec);
+        toast(early ? '已提前结束：现在只需要“标记完成”，然后去领取功德。' : '时间到：现在只需要“标记完成”，然后去领取功德。', 'warn');
+      }
+
+      function stopTimer() {
+        timer.running = false;
+        timer.endAt = 0;
+        if (timer.raf) cancelAnimationFrame(timer.raf);
+        timer.raf = null;
+        el.trashBanner.classList.add('hidden');
+        el.ringGlow.classList.add('hidden');
+      }
+
+      function markComplete() {
+        ritualReady = true;
+        renderRitualReady();
+        el.completeBtn.classList.add('hidden');
+        el.resetBtn.classList.remove('hidden');
+        const today = toYMD(new Date());
+        bumpMicro(today, 1);
+        renderCalendar();
+        renderProgress();
+        toast('微动已完成！去敲一下木鱼/金币，给自己 +1。', 'good');
+
+        // 生成未来长期任务候选 → 收集箱（异步，不阻塞）
+        (async () => {
+          await generateInboxFromMicroAction();
+        })();
+      }
+
+      function resetCountdown() {
+        stopTimer();
+        el.startBtn.disabled = !selectedIdeaId;
+        el.completeBtn.classList.add('hidden');
+        el.resetBtn.classList.add('hidden');
+        el.endEarlyBtn.classList.add('hidden');
+        setTimerUI(state.ui.durationSec, '待机', state.ui.durationSec);
+        toast('重来没关系：你是在训练“开始”的肌肉。', 'default');
+      }
+
+      function renderRitualReady() {
+        if (ritualReady) {
+          el.ritualReadyDot.classList.remove('bg-slate-500/50');
+          el.ritualReadyDot.classList.add('bg-emerald-400', 'shadow-[0_0_20px_rgba(52,211,153,0.65)]');
+          el.ritualBtn.classList.add('ring-emerald-400/20');
+        } else {
+          el.ritualReadyDot.classList.add('bg-slate-500/50');
+          el.ritualReadyDot.classList.remove('bg-emerald-400', 'shadow-[0_0_20px_rgba(52,211,153,0.65)]');
+          el.ritualBtn.classList.remove('ring-emerald-400/20');
+        }
+      }
+
+      function ritualClick() {
+        if (!ritualReady) {
+          toast(`功德还没亮：先完成一个 ${Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60)} 分钟微动。`, 'purple');
+          return;
+        }
+        ritualReady = false;
+        state.merit += 1;
+        save();
+        renderMerit();
+        renderRitualReady();
+
+        // micro animation
+        el.ritualBtn.classList.remove('animate-coin');
+        void el.ritualBtn.offsetWidth; // reflow
+        el.ritualBtn.classList.add('animate-coin');
+
+        el.floatText.classList.remove('hidden');
+        el.floatText.classList.add('animate-floatUp');
+        setTimeout(() => {
+          el.floatText.classList.add('hidden');
+          el.floatText.classList.remove('animate-floatUp');
+        }, 680);
+
+        toast('功德 +1：你做到了。让下一次“开始”更容易一点。', 'good');
+      }
+
+      const colliderDraft = {
+        ids: /** @type {string[]} */ ([]),
+      };
+
+      function getMashSelectedIdeas() {
+        return state.ideas.filter((x) => !isDecayed(x) && x.mashSelected);
+      }
+
+      function clearMashSelection() {
+        let changed = false;
+        state.ideas.forEach((x) => {
+          if (x.mashSelected) {
+            x.mashSelected = false;
+            changed = true;
+          }
+        });
+        if (changed) {
+          save();
+          renderIdeas();
+          renderColliderUI();
+        }
+      }
+
+      function renderColliderUI() {
+        const n = getMashSelectedIdeas().length;
+        if (n >= 1) {
+          el.colliderSelCount.textContent = String(n);
+          el.colliderSelCount.classList.remove('hidden');
+        } else {
+          el.colliderSelCount.classList.add('hidden');
+        }
+      }
+
+      function openColliderModal({ ids, text, tagKey }) {
+        colliderDraft.ids = ids.slice();
+
+        // selected list chips
+        const selected = colliderDraft.ids.map((id) => state.ideas.find((x) => x.id === id)).filter(Boolean);
+        el.colliderSelectedList.innerHTML = selected
+          .map((x) => {
+            const t = tagMeta(x.tag);
+            return `<span class="inline-flex items-center gap-1 rounded-full bg-white/5 px-3 py-1.5 text-xs ring-1 ring-white/10">
+              <span>${escapeHtml(t.emoji)}</span>
+              <span class="max-w-[220px] truncate">${escapeHtml(String(x.text).slice(0, 28))}${String(x.text).length > 28 ? '…' : ''}</span>
+            </span>`;
+          })
+          .join('');
+
+        // tag select
+        el.colliderTagSelect.innerHTML = state.tags
+          .map((t) => `<option value="${escapeHtml(t.key)}">${escapeHtml(t.emoji)} ${escapeHtml(t.label)}</option>`)
+          .join('');
+        const fallbackTag = selected[0]?.tag || state.tags[0]?.key || 'crazy';
+        el.colliderTagSelect.value = tagKey && state.tags.some((t) => t.key === tagKey) ? tagKey : fallbackTag;
+
+        el.colliderText.value = String(text || '').trim();
+        el.colliderModal.classList.remove('hidden');
+        lucide.createIcons();
+        setTimeout(() => el.colliderText.focus(), 50);
+      }
+
+      function closeColliderModal({ clearSelection = true } = {}) {
+        el.colliderModal.classList.add('hidden');
+        if (clearSelection) clearMashSelection();
+        colliderDraft.ids = [];
+      }
+
+      async function aiMashupToNewIdeaText(ideas) {
+        const system =
+          '你是一个极简但很会合成的“灵感炼金术师”。把多个灵感合成一个更聚焦、更可推进的新灵感。输出中文。不要夸张，不要空泛。';
+        const tagsLine = state.tags.map((t) => `${t.key}:${t.emoji}${t.label}`).join('，');
+        const user = [
+          `可用标签：${tagsLine}`,
+          '',
+          `请把下面这些灵感合成一个“新灵感”，并建议一个 tagKey。`,
+          `输出必须是严格 JSON：{"text":"...","tagKey":"..."}`,
+          `text 不超过 90 字。`,
+          '',
+          ...ideas.map((x, i) => `灵感${i + 1}：${x.text}`),
+        ].join('\n');
+
+        const out = await deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.85, maxTokens: 220 }
+        );
+
+        const obj = safeJsonParse(out, null) || safeJsonParse((out.match(/\{[\s\S]*\}/) || [])[0] || '', null);
+        if (!obj || typeof obj !== 'object') throw new Error('AI 输出不是可解析 JSON');
+        const text = String(obj.text || '').trim();
+        const tagKey = String(obj.tagKey || '').trim();
+        if (!text) throw new Error('AI 输出 text 为空');
+        return { text, tagKey };
+      }
+
+      function localMashupToNewIdeaText(ideas) {
+        const a = ideas[0]?.text || '';
+        const b = ideas[1]?.text || '';
+        const text = `融合：${a.slice(0, 10)}${a.length > 10 ? '…' : ''} + ${b.slice(0, 10)}${b.length > 10 ? '…' : ''} → 做一个“最小可验证版本”`;
+        const tagKey = ideas[0]?.tag || state.tags[0]?.key || 'crazy';
+        return { text, tagKey };
+      }
+
+      function acceptColliderMerge() {
+        const text = String(el.colliderText.value || '').trim();
+        const tagKey = String(el.colliderTagSelect.value || '').trim() || (state.tags[0]?.key || 'crazy');
+        if (!text) {
+          toast('新灵感不能为空（可以很短）。', 'warn');
+          return;
+        }
+        const ids = colliderDraft.ids.slice();
+        const idSet = new Set(ids);
+
+        // remove selected
+        const removedSelected = idSet.has(selectedIdeaId);
+        state.ideas = state.ideas.filter((x) => !idSet.has(x.id));
+        save();
+        if (removedSelected) resetActionPanel();
+
+        // create new
+        createIdea(text, tagKey);
+
+        // close without clearing (since already removed)
+        el.colliderModal.classList.add('hidden');
+        colliderDraft.ids = [];
+        toast('合并完成：新灵感已回到星空。', 'good');
+        renderColliderUI();
+      }
+
+      async function ideaCollider() {
+        const selected = getMashSelectedIdeas();
+        if (selected.length < 2) {
+          toast('先在灵感卡片右上角勾选至少 2 个，再点“灵感乱炖”。', 'warn');
+          return;
+        }
+
+        selected.forEach((x) => highlightIdeaCard(x.id));
+
+        try {
+          if (aiReady()) {
+            toast('正在乱炖…（DeepSeek）', 'purple');
+            const { text, tagKey } = await aiMashupToNewIdeaText(selected.slice(0, 6));
+            openColliderModal({ ids: selected.map((x) => x.id), text, tagKey });
+          } else {
+            const { text, tagKey } = localMashupToNewIdeaText(selected);
+            openColliderModal({ ids: selected.map((x) => x.id), text, tagKey });
+          }
+        } catch (err) {
+          toast(`乱炖失败，已回退本地方案：${String(err?.message || err)}`, 'warn');
+          const { text, tagKey } = localMashupToNewIdeaText(selected);
+          openColliderModal({ ids: selected.map((x) => x.id), text, tagKey });
+        }
+      }
+
+      function launchIdea() {
+        const text = el.ideaInput.value.trim();
+        if (!text) {
+          toast('先丢一句话进来（哪怕只有 3 个字）。', 'warn');
+          return;
+        }
+        const tag = state.ui.selectedTag;
+
+        // launch micro animation: create ghost bubble
+        const rect = el.ideaInput.getBoundingClientRect();
+        const ghost = document.createElement('div');
+        ghost.className =
+          'fixed z-50 max-w-[520px] rounded-3xl bg-white/10 ring-1 ring-white/10 px-4 py-3 text-sm text-slate-100/90 backdrop-blur shadow-soft animate-launch';
+        ghost.style.left = `${Math.min(rect.left + 18, window.innerWidth - 560)}px`;
+        ghost.style.top = `${rect.top + 12}px`;
+        ghost.style.width = `${Math.min(rect.width - 36, 520)}px`;
+        const t = tagMeta(tag);
+        ghost.innerHTML = `<div class="text-xs text-slate-300/70 mb-1">${t.emoji} ${escapeHtml(t.label)}</div><div class="line-clamp-3">${escapeHtml(text)}</div>`;
+        document.body.appendChild(ghost);
+        setTimeout(() => ghost.remove(), 340);
+
+        createIdea(text, tag);
+        el.ideaInput.value = '';
+        el.charCount.textContent = '0';
+
+        toast('已发射：它进入星空了。', 'good');
+      }
+
+      function wire() {
+        // initial
+        el.ideaInput.addEventListener('input', () => {
+          el.charCount.textContent = String(el.ideaInput.value.length);
+        });
+
+        el.ideaInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            launchIdea();
+          }
+        });
+
+        el.launchBtn.addEventListener('click', launchIdea);
+        el.taskifyBtn.addEventListener('click', taskifyVoidToCalendar);
+        el.colliderBtn.addEventListener('click', ideaCollider);
+        el.startBtn.addEventListener('click', startTimer);
+        el.endEarlyBtn.addEventListener('click', () => {
+          if (!timer.running) return;
+          finishTimer(true);
+        });
+        el.completeBtn.addEventListener('click', markComplete);
+        el.resetBtn.addEventListener('click', resetCountdown);
+        el.ritualBtn.addEventListener('click', ritualClick);
+
+        // duration quick control (Micro‑Action Mat)
+        const commitDur = (m) => {
+          const mm = Math.max(1, Math.min(30, Math.round(Number(m || 3))));
+          setDurationMin(mm);
+        };
+        el.durMinus.addEventListener('click', () => commitDur(Number(el.durInput.value || 3) - 1));
+        el.durPlus.addEventListener('click', () => commitDur(Number(el.durInput.value || 3) + 1));
+        el.durInput.addEventListener('change', () => commitDur(el.durInput.value));
+        el.durInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') commitDur(el.durInput.value);
+        });
+
+        el.graveToggle.addEventListener('click', () => {
+          setGraveOpen(!state.ui.graveOpen);
+        });
+
+        // calendar
+        el.calPrevBtn.addEventListener('click', () => {
+          calendar.viewMonth -= 1;
+          if (calendar.viewMonth < 0) {
+            calendar.viewMonth = 11;
+            calendar.viewYear -= 1;
+          }
+          renderCalendar();
+        });
+        el.calNextBtn.addEventListener('click', () => {
+          calendar.viewMonth += 1;
+          if (calendar.viewMonth > 11) {
+            calendar.viewMonth = 0;
+            calendar.viewYear += 1;
+          }
+          renderCalendar();
+        });
+        el.calTodayBtn.addEventListener('click', () => {
+          const t = new Date();
+          calendar.viewYear = t.getFullYear();
+          calendar.viewMonth = t.getMonth();
+          setSelectedDate(toYMD(t));
+        });
+
+        // task modal
+        el.openTaskModalBtn.addEventListener('click', () => openTaskModal(null));
+        const closeTask = () => closeTaskModal();
+        el.taskBackdrop.addEventListener('click', closeTask);
+        el.taskCloseBtn.addEventListener('click', closeTask);
+        el.taskCancelBtn.addEventListener('click', closeTask);
+        el.taskSaveBtn.addEventListener('click', saveTaskFromModal);
+        el.taskDeleteBtn.addEventListener('click', () => {
+          if (!editingTaskId) return;
+          toast('确定要删除吗？再点一次就删（给你 2 秒犹豫）。', 'warn');
+          el.taskDeleteBtn.disabled = true;
+          setTimeout(() => (el.taskDeleteBtn.disabled = false), 2000);
+          el.taskDeleteBtn.addEventListener(
+            'click',
+            () => {
+              const id = editingTaskId;
+              closeTaskModal();
+              deleteTaskById(id);
+            },
+            { once: true }
+          );
+        });
+
+        // inbox modal
+        const openInbox = () => openInboxModal();
+        const closeInbox = () => closeInboxModal();
+        el.inboxBtn.addEventListener('click', openInbox);
+        el.openInboxBtn.addEventListener('click', openInbox);
+        el.inboxBackdrop.addEventListener('click', closeInbox);
+        el.inboxCloseBtn.addEventListener('click', closeInbox);
+        el.inboxCloseBtn2.addEventListener('click', closeInbox);
+        el.inboxAddManualBtn.addEventListener('click', addManualInboxItem);
+
+        // inbox editor delegation
+        el.inboxList.addEventListener('input', (e) => {
+          const target = e.target;
+          const id = target?.dataset?.inboxId;
+          const field = target?.dataset?.field;
+          if (!id || !field) return;
+          const item = state.inbox.find((x) => x.id === id);
+          if (!item) return;
+          if (field === 'durationMin') item.durationMin = Math.max(1, Math.round(Number(target.value || 20)));
+          else item[field] = String(target.value || '');
+          save();
+          renderInboxEverywhere();
+        });
+
+        el.inboxList.addEventListener('click', (e) => {
+          const scheduleBtn = e.target?.closest?.('[data-schedule-inbox]');
+          if (scheduleBtn) {
+            scheduleInboxItem(scheduleBtn.getAttribute('data-schedule-inbox'));
+            renderInboxModal();
+            return;
+          }
+          const delBtn = e.target?.closest?.('[data-delete-inbox]');
+          if (delBtn) {
+            deleteInboxItem(delBtn.getAttribute('data-delete-inbox'));
+            return;
+          }
+        });
+
+        // collider modal
+        const closeCollider = () => closeColliderModal({ clearSelection: true });
+        el.colliderBackdrop.addEventListener('click', closeCollider);
+        el.colliderCloseBtn.addEventListener('click', closeCollider);
+        el.colliderCancelBtn.addEventListener('click', closeCollider);
+        el.colliderAcceptBtn.addEventListener('click', acceptColliderMerge);
+
+        // settings modal
+        const openSettings = () => {
+          el.settingsModal.classList.remove('hidden');
+          renderSettingsUI();
+          lucide.createIcons();
+        };
+        const closeSettings = () => el.settingsModal.classList.add('hidden');
+        el.settingsBtn.addEventListener('click', openSettings);
+        el.settingsBackdrop.addEventListener('click', closeSettings);
+        el.settingsCloseBtn.addEventListener('click', closeSettings);
+        window.addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape') return;
+          if (!el.taskModal.classList.contains('hidden')) closeTaskModal();
+          if (!el.inboxModal.classList.contains('hidden')) closeInboxModal();
+          if (!el.colliderModal.classList.contains('hidden')) closeColliderModal({ clearSelection: true });
+          if (!el.settingsModal.classList.contains('hidden')) closeSettings();
+        });
+
+        el.settingsSaveBtn.addEventListener('click', () => {
+          // AI
+          state.ai.enabled = Boolean(el.aiEnabled.checked);
+          state.ai.apiKey = String(el.aiKey.value || '');
+          state.ai.baseUrl = String(el.aiBaseUrl.value || DEFAULT_AI.baseUrl).trim() || DEFAULT_AI.baseUrl;
+          state.ai.model = String(el.aiModel.value || DEFAULT_AI.model).trim() || DEFAULT_AI.model;
+
+          // Selected tag guard
+          if (!state.tags.some((t) => t.key === state.ui.selectedTag)) state.ui.selectedTag = state.tags[0]?.key || 'crazy';
+
+          save();
+          renderTags();
+          renderDurationUI();
+          closeSettings();
+          toast('设置已保存。', 'good');
+        });
+
+        el.settingsResetBtn.addEventListener('click', () => {
+          state.tags = DEFAULT_TAGS.map((t) => ({ ...t }));
+          state.ai = { ...DEFAULT_AI };
+          state.ui.durationSec = DEFAULT_DURATION_SEC;
+          if (!state.tags.some((t) => t.key === state.ui.selectedTag)) state.ui.selectedTag = state.tags[0].key;
+          save();
+          renderTags();
+          renderDurationUI();
+          renderIdeas();
+          renderSettingsUI();
+          lucide.createIcons();
+          toast('已恢复默认设置。', 'default');
+        });
+
+        el.addTagBtn.addEventListener('click', () => {
+          if (state.tags.length >= 12) {
+            toast('标签太多会让大脑更乱：先别超过 12 个。', 'warn');
+            return;
+          }
+          const newTag = {
+            key: `t_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+            emoji: '✨',
+            label: '新标签',
+            accent: 'purple',
+          };
+          state.tags.push(newTag);
+          save();
+          renderTags();
+          renderSettingsUI();
+          lucide.createIcons();
+          toast('已添加一个新标签：你可以在列表里改名/改emoji。', 'good');
+        });
+
+        // tag editor (delegation)
+        el.tagEditorList.addEventListener('input', (e) => {
+          const target = e.target;
+          const idx = Number(target?.dataset?.idx);
+          const field = target?.dataset?.field;
+          if (Number.isNaN(idx) || !field || !state.tags[idx]) return;
+          if (field === 'emoji') state.tags[idx].emoji = String(target.value || '').slice(0, 2) || '✨';
+          if (field === 'label') state.tags[idx].label = String(target.value || '').slice(0, 8) || '标签';
+          if (field === 'accent') state.tags[idx].accent = String(target.value || 'purple');
+          save();
+          renderTags();
+        });
+
+        el.tagEditorList.addEventListener('click', (e) => {
+          const btn = e.target?.closest?.('[data-remove-idx]');
+          if (!btn) return;
+          const idx = Number(btn.getAttribute('data-remove-idx'));
+          if (Number.isNaN(idx)) return;
+          if (state.tags.length <= 1) {
+            toast('至少保留 1 个标签。', 'warn');
+            return;
+          }
+          const removed = state.tags[idx];
+          state.tags.splice(idx, 1);
+          if (removed?.key && state.ui.selectedTag === removed.key) {
+            state.ui.selectedTag = state.tags[0].key;
+          }
+          save();
+          renderTags();
+          renderSettingsUI();
+          lucide.createIcons();
+          toast('已删除一个标签。', 'default');
+        });
+
+        // subtle autopersist & re-render time labels
+        setInterval(() => {
+          // re-render counts & age text every minute-ish (lightweight: rebuild only if there are ideas)
+          if (!state.ideas.length) return;
+          renderIdeas();
+        }, 60000);
+
+        // Mobile merit: tap header card? Keep simple: mirror counter in title
+        const syncTitle = () => {
+          document.title = `VibeFlow · 灵感微流 · 功德 ${state.merit}`;
+        };
+        syncTitle();
+        const origSave = save;
+        save = function () {
+          origSave();
+          syncTitle();
+        };
+      }
+
+      function bootstrap() {
+        load();
+        renderMerit();
+        renderTags();
+        renderDurationUI();
+        renderIdeas();
+        renderColliderUI();
+        setGraveOpen(Boolean(state.ui.graveOpen));
+        renderRitualReady();
+        resetActionPanel();
+        // calendar init
+        const t = new Date();
+        calendar.viewYear = t.getFullYear();
+        calendar.viewMonth = t.getMonth();
+        calendar.selectedYMD = toYMD(t);
+        renderWeatherUI();
+        renderCalendar();
+        renderDayTasks();
+        renderInboxEverywhere();
+        renderProgress();
+        initWeatherAuto();
+        wire();
+        lucide.createIcons();
+        toast(`欢迎回来。今天只需要：开始 ${Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60)} 分钟。`, 'purple');
+      }
+
+      function setDurationMin(min) {
+        const m = Math.max(1, Math.min(30, Math.round(Number(min || 3))));
+        state.ui.durationSec = m * 60;
+        save();
+        renderDurationUI();
+        // cards & hints will use minutes
+        renderIdeas();
+        renderColliderUI();
+        // if idle, update ring display
+        if (!timer.running) setTimerUI(state.ui.durationSec, '待机', state.ui.durationSec);
+      }
+
+      function renderDurationUI() {
+        const min = Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60);
+        el.durationTitle.textContent = `${min} 分钟倒计时`;
+        el.startBtnLabel.textContent = `开始 ${min} 分钟`;
+        if (el.microHint) el.microHint.textContent = `点击任意星星 → 右侧生成 ${min} 分钟微动`;
+        if (el.durInput) el.durInput.value = String(min);
+        // keep idle timer display consistent
+        if (!timer.running) setTimerUI(state.ui.durationSec, '待机', state.ui.durationSec);
+      }
+
+      function renderSettingsUI() {
+        // AI
+        el.aiEnabled.checked = Boolean(state.ai.enabled);
+        el.aiKey.value = String(state.ai.apiKey || '');
+        el.aiBaseUrl.value = String(state.ai.baseUrl || DEFAULT_AI.baseUrl);
+        el.aiModel.value = String(state.ai.model || DEFAULT_AI.model);
+
+        // Tags
+        el.tagEditorList.innerHTML = state.tags
+          .map((t, idx) => {
+            return `
+              <div class="grid gap-2 rounded-3xl bg-black/20 p-4 ring-1 ring-white/10 sm:grid-cols-[90px_1fr_140px_auto] sm:items-center">
+                <label class="grid gap-1">
+                  <span class="text-[11px] text-slate-300/70">Emoji</span>
+                  <input data-idx="${idx}" data-field="emoji" value="${escapeHtml(t.emoji || '✨')}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                </label>
+                <label class="grid gap-1">
+                  <span class="text-[11px] text-slate-300/70">名称</span>
+                  <input data-idx="${idx}" data-field="label" value="${escapeHtml(t.label || '标签')}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                </label>
+                <label class="grid gap-1">
+                  <span class="text-[11px] text-slate-300/70">颜色</span>
+                  <select data-idx="${idx}" data-field="accent" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40">
+                    <option value="purple" ${t.accent === 'purple' ? 'selected' : ''}>紫</option>
+                    <option value="gold" ${t.accent === 'gold' ? 'selected' : ''}>金</option>
+                    <option value="emerald" ${t.accent === 'emerald' ? 'selected' : ''}>绿</option>
+                    <option value="cyan" ${t.accent === 'cyan' ? 'selected' : ''}>青</option>
+                  </select>
+                </label>
+                <button data-remove-idx="${idx}" class="inline-flex items-center justify-center rounded-2xl bg-white/5 px-3 py-3 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="trash-2" class="h-4 w-4"></i>
+                </button>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      bootstrap();
+    </script>
+  </body>
+</html>
