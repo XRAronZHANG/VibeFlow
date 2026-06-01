@@ -373,9 +373,9 @@
                     <i data-lucide="timer" class="h-4 w-4 text-neon-emerald"></i>
                     <h2 class="text-sm font-semibold tracking-tight">Micro‑Action Mat · 微行动看板</h2>
                   </div>
-                  <div class="inline-flex items-center gap-2 text-xs text-slate-300/70">
+                  <div class="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-300/70">
                     <span class="hidden sm:inline">规则：</span>
-                    <span class="inline-flex items-center gap-2 rounded-full bg-white/5 px-2 py-1 ring-1 ring-white/10">
+                    <span class="inline-flex items-center gap-2 sm:rounded-full sm:bg-white/5 sm:px-2 sm:py-1 sm:ring-1 sm:ring-white/10">
                       <span class="text-slate-300/70">只做</span>
                       <button
                         id="durMinus"
@@ -390,7 +390,7 @@
                         min="1"
                         max="30"
                         step="1"
-                        class="w-14 rounded-full bg-black/25 px-2 py-1 text-center text-xs font-semibold tabular-nums ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                        class="w-12 appearance-none bg-transparent px-1 py-1 text-center text-xs font-semibold tabular-nums border-b border-white/15 focus:outline-none focus:border-violet-400/60 sm:w-14 sm:rounded-full sm:bg-black/25 sm:px-2 sm:border-b-0 sm:ring-1 sm:ring-white/10 sm:focus:ring-2 sm:focus:ring-violet-400/40"
                         value="3"
                         title="分钟数（1-30）"
                       />
@@ -403,7 +403,8 @@
                       </button>
                       <span class="text-slate-300/70">分钟</span>
                     </span>
-                    <span class="rounded-full bg-white/5 px-2 py-1 ring-1 ring-white/10">只求“垃圾可见”</span>
+                    <span class="hidden sm:inline text-slate-300/40">·</span>
+                    <span class="sm:rounded-full sm:bg-white/5 sm:px-2 sm:py-1 sm:ring-1 sm:ring-white/10 text-slate-300/80">只求“垃圾可见”</span>
                   </div>
                 </div>
 
@@ -566,13 +567,19 @@
                   <div class="text-lg font-semibold tracking-tight tabular-nums">
                     <span id="calMonthLabel">—</span>
                   </div>
-                  <div id="todayWeatherPill" class="hidden items-center gap-2 rounded-full bg-white/5 bg-[length:200%_200%] px-3 py-1.5 text-xs ring-1 ring-white/10 shadow-[0_0_30px_rgba(103,232,249,0.08)] animate-shimmer">
-                    <i id="todayWeatherIcon" data-lucide="cloud" class="h-4 w-4 text-neon-emerald"></i>
-                    <span id="todayWeatherText" class="text-slate-200">今日天气：—</span>
+                  <div
+                    id="todayWeatherPill"
+                    class="hidden flex w-full flex-col items-start gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-2 rounded-2xl sm:rounded-full bg-white/5 bg-[length:200%_200%] px-3 py-2 text-xs ring-1 ring-white/10 shadow-[0_0_30px_rgba(103,232,249,0.08)] animate-shimmer"
+                  >
+                    <div class="flex items-center gap-2">
+                      <i id="todayWeatherIcon" data-lucide="cloud" class="h-4 w-4 text-neon-emerald"></i>
+                      <span id="todayWeatherText" class="text-slate-200">今日天气：—</span>
+                    </div>
+                    <div id="weatherStrip" class="mt-2 flex gap-2 overflow-x-auto pb-1 sm:mt-0 sm:pb-0 sm:overflow-visible"></div>
                   </div>
                 </div>
 
-                <div class="mt-4 grid grid-cols-7 gap-2 text-xs text-slate-300/70">
+                <div class="mt-4 grid grid-cols-7 gap-1 sm:gap-2 text-xs text-slate-300/70">
                   <div class="text-center">一</div>
                   <div class="text-center">二</div>
                   <div class="text-center">三</div>
@@ -581,7 +588,7 @@
                   <div class="text-center">六</div>
                   <div class="text-center text-slate-300/60">日</div>
                 </div>
-                <div id="calendarGrid" class="mt-2 grid grid-cols-7 gap-2"></div>
+                <div id="calendarGrid" class="mt-2 grid grid-cols-7 gap-1 sm:gap-2"></div>
 
                 <div class="mt-4 text-xs text-slate-300/60">
                   小规则：点击日期 → 右侧编辑任务。日历只要“可用”，不追求“完美”。
@@ -1113,7 +1120,7 @@
         tasks: [],
         inbox: [],
         stats: { microByDate: {} },
-        weather: { today: null, fetchedAt: 0, lat: null, lon: null },
+        weather: { today: null, forecast: [], fetchedAt: 0, lat: null, lon: null },
         ui: { selectedTag: 'crazy', graveOpen: false, durationSec: DEFAULT_DURATION_SEC },
       };
 
@@ -1206,6 +1213,7 @@
         todayWeatherPill: document.getElementById('todayWeatherPill'),
         todayWeatherIcon: document.getElementById('todayWeatherIcon'),
         todayWeatherText: document.getElementById('todayWeatherText'),
+        weatherStrip: document.getElementById('weatherStrip'),
 
         // day tasks
         selectedDateLabel: document.getElementById('selectedDateLabel'),
@@ -1860,6 +1868,7 @@
 
       function renderCalendar() {
         const today = toYMD(new Date());
+        const forecastMap = Object.fromEntries((state.weather?.forecast || []).map((x) => [x.date, x]));
         el.calMonthLabel.textContent = `${calendar.viewYear} 年 ${calendar.viewMonth + 1} 月`;
 
         const first = new Date(calendar.viewYear, calendar.viewMonth, 1);
@@ -1897,18 +1906,15 @@
           const total = state.tasks.filter((t) => t.date === ymd).length;
           const done = tasksDoneCount(ymd);
 
-          const weatherLine =
-            isToday && state.weather?.today
-              ? `<div class="mt-1 flex items-center gap-1 text-[10px] text-slate-200/90">
-                   <span class="text-[12px] leading-none">${escapeHtml(state.weather.today.emoji || '🌤️')}</span>
-                   <span>${escapeHtml(state.weather.today.short || state.weather.today.text || '')}</span>
-                 </div>`
-              : '';
+          const w = forecastMap[ymd];
+          const weatherLine = w
+            ? `<div class="mt-1 text-[12px] leading-none">${escapeHtml(w.emoji || '🌤️')}</div>`
+            : '';
 
           cells.push(`
             <button
               data-ymd="${ymd}"
-              class="calCell group relative overflow-hidden rounded-2xl bg-white/[0.03] px-2.5 py-2 ring-1 ring-white/10 text-left transition hover:bg-white/[0.06] active:scale-[0.99] ${
+              class="calCell group relative overflow-hidden rounded-2xl bg-white/[0.03] px-1.5 py-1.5 sm:px-2.5 sm:py-2 ring-1 ring-white/10 text-left transition hover:bg-white/[0.06] active:scale-[0.99] ${
                 !inMonth ? 'opacity-45' : ''
               } ${isSelected ? 'ring-violet-400/35 shadow-[0_0_0_1px_rgba(167,139,250,0.25),_0_12px_28px_rgba(167,139,250,0.10)]' : ''}"
               title="${escapeHtml(ymdLabel(ymd))}"
@@ -1917,7 +1923,7 @@
                 <div class="text-xs font-semibold tabular-nums ${isToday ? 'text-neon-gold' : 'text-slate-200'}">${d}</div>
                 ${
                   total > 0
-                    ? `<div class="text-[10px] tabular-nums text-slate-300/70">${done}/${total}</div>`
+                    ? `<div class="hidden sm:block text-[10px] tabular-nums text-slate-300/70">${done}/${total}</div><div class="sm:hidden text-[10px] text-slate-300/60">•</div>`
                     : `<div class="text-[10px] text-slate-300/40">·</div>`
                 }
               </div>
@@ -2242,19 +2248,46 @@
         return { text: '天气', icon: 'cloud', emoji: '🌡️', bg: 'linear-gradient(90deg, rgba(148,163,184,0.16), rgba(255,255,255,0.03), rgba(148,163,184,0.10))' };
       }
 
-      async function fetchTodayWeather(lat, lon) {
+      async function fetchWeatherForecast(lat, lon) {
         const url =
           `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}` +
           `&longitude=${encodeURIComponent(lon)}` +
-          `&current=temperature_2m,weather_code&timezone=auto`;
+          `&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=8&timezone=auto`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`天气 HTTP ${res.status}`);
         const data = await res.json();
-        const temp = data?.current?.temperature_2m;
-        const code = data?.current?.weather_code;
-        if (temp == null || code == null) throw new Error('天气数据缺失');
-        const meta = weatherCodeMeta(code);
-        return { temp: Math.round(Number(temp)), code: Number(code), ...meta };
+        const time = data?.daily?.time;
+        const codes = data?.daily?.weather_code;
+        const tMax = data?.daily?.temperature_2m_max;
+        const tMin = data?.daily?.temperature_2m_min;
+        if (!Array.isArray(time) || !Array.isArray(codes) || !Array.isArray(tMax) || !Array.isArray(tMin)) throw new Error('天气预报数据缺失');
+
+        const forecast = time.slice(0, 8).map((d, i) => {
+          const code = Number(codes[i]);
+          const meta = weatherCodeMeta(code);
+          const max = Math.round(Number(tMax[i]));
+          const min = Math.round(Number(tMin[i]));
+          return {
+            date: String(d),
+            code,
+            emoji: meta.emoji || '🌤️',
+            icon: meta.icon || 'cloud',
+            text: meta.text || '天气',
+            tMax: max,
+            tMin: min,
+            bg: meta.bg || '',
+          };
+        });
+
+        const today = forecast[0]
+          ? {
+              ...forecast[0],
+              short: `${forecast[0].emoji} ${forecast[0].tMax}°/${forecast[0].tMin}°`,
+              text: `${forecast[0].emoji} ${forecast[0].text} · ${forecast[0].tMax}°/${forecast[0].tMin}°`,
+            }
+          : null;
+
+        return { today, forecast };
       }
 
       async function initWeatherAuto() {
@@ -2267,16 +2300,9 @@
               const lon = pos.coords.longitude;
               state.weather.lat = lat;
               state.weather.lon = lon;
-              const w = await fetchTodayWeather(lat, lon);
-              state.weather.today = {
-                temp: w.temp,
-                code: w.code,
-                icon: w.icon,
-                emoji: w.emoji || '🌤️',
-                short: `${(w.emoji || '🌤️')} ${w.temp}°`,
-                text: `${(w.emoji || '🌤️')} ${w.text} · ${w.temp}°C`,
-                bg: w.bg || '',
-              };
+              const w = await fetchWeatherForecast(lat, lon);
+              state.weather.today = w.today;
+              state.weather.forecast = w.forecast || [];
               state.weather.fetchedAt = now();
               save();
               renderWeatherUI();
@@ -2305,9 +2331,31 @@
             holder.outerHTML = `<i id="todayWeatherIcon" data-lucide="${escapeHtml(iconName)}" class="h-4 w-4 text-neon-emerald"></i>`;
             el.todayWeatherIcon = document.getElementById('todayWeatherIcon');
           }
+          // 未来 7 天（含今天）预报条
+          const fc = (state.weather.forecast || []).slice(0, 8);
+          if (el.weatherStrip) {
+            el.weatherStrip.innerHTML = fc
+              .map((x, idx) => {
+                const isToday = idx === 0;
+                const wd = weekdayCN(x.date);
+                return `
+                  <div
+                    title="${escapeHtml(x.date)} · ${escapeHtml(x.text)} · ${escapeHtml(String(x.tMax))}°/${escapeHtml(String(x.tMin))}°"
+                    class="flex shrink-0 items-center gap-1 rounded-full bg-white/5 px-2 py-1 ring-1 ring-white/10 ${isToday ? 'ring-violet-400/25' : ''}"
+                  >
+                    <span class="text-[11px] text-slate-300/70">周${wd}</span>
+                    <span class="text-[13px] leading-none">${escapeHtml(x.emoji || '🌤️')}</span>
+                    <span class="text-[11px] tabular-nums text-slate-200/85">${escapeHtml(String(x.tMax))}°</span>
+                  </div>
+                `;
+              })
+              .join('');
+          }
           lucide.createIcons();
         } else {
           el.todayWeatherPill.classList.add('hidden');
+          if (el.weatherStrip) el.weatherStrip.innerHTML = '';
+          el.todayWeatherPill.style.backgroundImage = '';
         }
       }
 
