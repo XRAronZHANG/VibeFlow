@@ -307,6 +307,17 @@
                         入历
                       </span>
                     </button>
+
+                    <button
+                      id="roadmapBtn"
+                      class="group relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white/5 px-5 py-3 text-sm font-semibold text-slate-200 ring-1 ring-white/10 shadow-soft transition hover:bg-white/8 active:scale-[0.98]"
+                      title="生成：现在的 3 分钟微行动 + 未来 7 天推进路线（可一键入历）"
+                    >
+                      <span class="relative inline-flex items-center gap-2">
+                        <i data-lucide="sparkles" class="h-4 w-4 text-neon-gold"></i>
+                        给我一条路
+                      </span>
+                    </button>
                   </div>
                 </div>
 
@@ -1114,6 +1125,85 @@
       </div>
     </div>
 
+    <!-- Roadmap Modal -->
+    <div id="roadmapModal" class="fixed inset-0 z-50 hidden">
+      <div id="roadmapBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+          <div class="relative overflow-hidden rounded-3xl bg-space-850/95 ring-1 ring-white/10 shadow-soft">
+            <div class="pointer-events-none absolute inset-0">
+              <div class="absolute -top-24 -left-10 h-64 w-64 rounded-full bg-neon-gold/10 blur-3xl"></div>
+              <div class="absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-violet-500/12 blur-3xl"></div>
+            </div>
+
+            <div class="relative p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="sparkles" class="h-4 w-4 text-neon-gold"></i>
+                    <div class="text-sm font-semibold">给我一条路 · 7 天推进路线</div>
+                  </div>
+                  <div id="roadmapSubtitle" class="mt-1 text-xs text-slate-300/70">把一句话变成：现在能做的一步 + 未来 7 天的落地任务。</div>
+                </div>
+                <button id="roadmapCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <div class="mt-5 grid gap-4">
+                <div id="roadmapLoading" class="hidden rounded-3xl border border-white/10 bg-white/[0.03] p-5 text-sm text-slate-300/80">
+                  正在生成路线…（DeepSeek）
+                </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="text-sm font-semibold">现在（3 分钟）</div>
+                    <button
+                      id="roadmapCopyMicroBtn"
+                      class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                      title="复制微行动"
+                    >
+                      <i data-lucide="copy" class="h-4 w-4"></i>
+                      复制
+                    </button>
+                  </div>
+                  <div id="roadmapMicroText" class="mt-3 whitespace-pre-wrap rounded-2xl bg-black/20 px-4 py-3 text-sm leading-relaxed text-slate-200 ring-1 ring-white/10">
+                    —
+                  </div>
+                </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="text-sm font-semibold">未来 7 天</div>
+                    <button
+                      id="roadmapAddAllBtn"
+                      class="inline-flex items-center gap-2 rounded-2xl bg-emerald-400/80 px-3 py-2 text-xs font-semibold text-emerald-950 shadow-glowE hover:brightness-110 transition active:scale-[0.99]"
+                      title="把下面所有任务加入日历"
+                    >
+                      <i data-lucide="calendar-check" class="h-4 w-4"></i>
+                      一键入历
+                    </button>
+                  </div>
+                  <div class="mt-3 text-xs text-slate-300/70">可以先改标题/日期/时间/分钟，再加入。</div>
+                  <div id="roadmapTaskList" class="mt-4 grid gap-3"></div>
+                </div>
+              </div>
+
+              <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
+                <button
+                  id="roadmapCancelBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                >
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                  关闭
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       /***********************
        * VibeFlow (Local-First)
@@ -1185,6 +1275,7 @@
         ideaInput: document.getElementById('ideaInput'),
         launchBtn: document.getElementById('launchBtn'),
         taskifyBtn: document.getElementById('taskifyBtn'),
+        roadmapBtn: document.getElementById('roadmapBtn'),
         charCount: document.getElementById('charCount'),
         tagRow: document.getElementById('tagRow'),
         ideaList: document.getElementById('ideaList'),
@@ -1304,6 +1395,18 @@
         ideaTaskLoading: document.getElementById('ideaTaskLoading'),
         ideaTaskList: document.getElementById('ideaTaskList'),
         ideaTaskEmpty: document.getElementById('ideaTaskEmpty'),
+
+        // roadmap modal
+        roadmapModal: document.getElementById('roadmapModal'),
+        roadmapBackdrop: document.getElementById('roadmapBackdrop'),
+        roadmapCloseBtn: document.getElementById('roadmapCloseBtn'),
+        roadmapCancelBtn: document.getElementById('roadmapCancelBtn'),
+        roadmapSubtitle: document.getElementById('roadmapSubtitle'),
+        roadmapLoading: document.getElementById('roadmapLoading'),
+        roadmapMicroText: document.getElementById('roadmapMicroText'),
+        roadmapCopyMicroBtn: document.getElementById('roadmapCopyMicroBtn'),
+        roadmapAddAllBtn: document.getElementById('roadmapAddAllBtn'),
+        roadmapTaskList: document.getElementById('roadmapTaskList'),
       };
 
       // Ring geometry
@@ -2955,6 +3058,185 @@
         }
       }
 
+      function localGenerateRoadmap(text, startYMD) {
+        const y0 = startYMD || toYMD(new Date());
+        const base = String(text || '').trim();
+        const short = base.slice(0, 16) + (base.length > 16 ? '…' : '');
+        const micro = `目标：${short}\n今日微动：用 ${Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60)} 分钟写下“标题 + 3个要点”，别润色。\n加速器：只求写完，不求写好。`;
+        const tasks = [
+          { title: `定义成功标准：${short}`, notes: '用一句话写“做成了长什么样”。', date: y0, time: '', durationMin: 20 },
+          { title: `找 3 个参考：${short}`, notes: '只截图/收藏，不评价。', date: addDays(y0, 1), time: '', durationMin: 20 },
+          { title: `做最小骨架：${short}`, notes: '只做目录/结构/草图。', date: addDays(y0, 2), time: '', durationMin: 30 },
+          { title: `产出一个可见证据：${short}`, notes: '一页文档/一张图/一个可点原型。', date: addDays(y0, 3), time: '', durationMin: 45 },
+          { title: `找一个人反馈：${short}`, notes: '发给朋友/同事：只问“哪里不懂”。', date: addDays(y0, 4), time: '', durationMin: 15 },
+          { title: `迭代一次：${short}`, notes: '只改最关键的 1 个点。', date: addDays(y0, 5), time: '', durationMin: 30 },
+          { title: `收尾/发布：${short}`, notes: '写一句发布文案/提交/发出去。', date: addDays(y0, 6), time: '', durationMin: 25 },
+        ];
+        return { microAction: micro, tasks };
+      }
+
+      async function aiGenerateRoadmap(text, startYMD) {
+        const durationMin = Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60);
+        const today = toYMD(new Date());
+        const system =
+          '你是一个极简但很会推进的“7天落地路线”教练：把用户一句话目标变成一个现在就能做的微行动，以及未来7天的可安排任务。输出必须是严格 JSON，不要任何多余文字。';
+        const user = [
+          `今天日期：${today}`,
+          `起始日期（用于铺排未来7天）：${startYMD}`,
+          '',
+          `用户输入：${String(text || '').trim()}`,
+          '',
+          '请输出严格 JSON：',
+          '{"microAction":"三行文本","tasks":[...]}',
+          '',
+          '规则：',
+          `1) microAction 必须是三行，格式严格为：目标/今日微动/加速器，并且今日微动不超过 ${durationMin} 分钟`,
+          '2) tasks 长度必须是 7',
+          '3) 每个 task 字段严格为：title, notes, date, time, durationMin',
+          '4) date 必须是 YYYY-MM-DD，按起始日期开始连续铺 7 天（可以跳一天但总数仍是7）',
+          '5) time 可为空字符串；durationMin 为 5~240 的整数',
+          '6) title <= 22字，notes <= 60字，务必可执行、不要空泛',
+          '只输出 JSON。不要 markdown。不要解释。',
+        ].join('\n');
+
+        const out = await deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.7, maxTokens: 520 }
+        );
+
+        const obj = safeJsonParse(out, null) || safeJsonParse((out.match(/\{[\s\S]*\}/) || [])[0] || '', null);
+        if (!obj || typeof obj !== 'object') throw new Error('AI 输出不是可解析 JSON');
+        const microAction = String(obj.microAction || '').trim();
+        const arr = Array.isArray(obj.tasks) ? obj.tasks : null;
+        if (!microAction || !arr) throw new Error('AI 输出缺少字段');
+        const tasks = arr.slice(0, 7).map((x, i) => ({
+          title: String(x?.title || `第${i + 1}天任务`).trim().slice(0, 60),
+          notes: String(x?.notes || '').trim().slice(0, 240),
+          date: normalizeDateMaybe(x?.date, addDays(startYMD, i)),
+          time: String(x?.time || '').trim(),
+          durationMin: Math.max(5, Math.min(240, Math.round(Number(x?.durationMin || 20)))),
+        }));
+        return { microAction, tasks };
+      }
+
+      let roadmapDraft = { microAction: '', tasks: [] };
+
+      function openRoadmapModal() {
+        el.roadmapModal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+
+      function closeRoadmapModal() {
+        el.roadmapModal.classList.add('hidden');
+        roadmapDraft = { microAction: '', tasks: [] };
+      }
+
+      function renderRoadmapTasks() {
+        el.roadmapTaskList.innerHTML = (roadmapDraft.tasks || [])
+          .map((t, idx) => {
+            const wd = weekdayCN(t.date);
+            return `
+              <div class="rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4">
+                <div class="grid gap-3 lg:grid-cols-[1fr_170px_130px_120px_auto] lg:items-end">
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">标题（周${wd}）</span>
+                    <input data-road-idx="${idx}" data-field="title" value="${escapeHtml(t.title)}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">日期</span>
+                    <input data-road-idx="${idx}" data-field="date" type="date" value="${escapeHtml(t.date)}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">时间</span>
+                    <input data-road-idx="${idx}" data-field="time" type="time" value="${escapeHtml(t.time || '')}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <label class="grid gap-1">
+                    <span class="text-[11px] text-slate-300/70">分钟</span>
+                    <input data-road-idx="${idx}" data-field="durationMin" type="number" min="5" max="240" step="1" value="${escapeHtml(
+                      String(t.durationMin || 20)
+                    )}" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40" />
+                  </label>
+                  <div class="flex items-center justify-end">
+                    <button data-road-add="${idx}" class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition">
+                      <i data-lucide="calendar-plus" class="h-4 w-4"></i>
+                      加入
+                    </button>
+                  </div>
+                </div>
+                <label class="mt-3 grid gap-1">
+                  <span class="text-[11px] text-slate-300/70">备注</span>
+                  <textarea data-road-idx="${idx}" data-field="notes" rows="2" class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40">${escapeHtml(
+                    t.notes || ''
+                  )}</textarea>
+                </label>
+              </div>
+            `;
+          })
+          .join('');
+        lucide.createIcons();
+      }
+
+      function addRoadmapTaskToCalendar(task) {
+        const fallbackYMD = calendar?.selectedYMD || toYMD(new Date());
+        const date = normalizeDateMaybe(task.date, fallbackYMD);
+        state.tasks.push({
+          id: uid(),
+          title: String(task.title || '一个任务'),
+          date,
+          time: String(task.time || ''),
+          durationMin: Math.max(5, Math.min(240, Math.round(Number(task.durationMin || 20)))),
+          notes: String(task.notes || ''),
+          done: false,
+          createdAt: now(),
+          updatedAt: now(),
+        });
+      }
+
+      function addAllRoadmapToCalendar() {
+        const tasks = roadmapDraft.tasks || [];
+        if (!tasks.length) return;
+        tasks.forEach(addRoadmapTaskToCalendar);
+        save();
+        const first = tasks[0];
+        const dt = fromYMD(normalizeDateMaybe(first.date, calendar?.selectedYMD || toYMD(new Date())));
+        calendar.viewYear = dt.getFullYear();
+        calendar.viewMonth = dt.getMonth();
+        setSelectedDate(toYMD(dt));
+        renderCalendar();
+        renderDayTasks();
+        renderProgress();
+        toast('已一键入历：未来 7 天已铺好。', 'good');
+        closeRoadmapModal();
+      }
+
+      async function generateRoadmapFromVoid() {
+        const text = String(el.ideaInput.value || '').trim();
+        if (!text) {
+          toast('先写一句话，再点“给我一条路”。', 'warn');
+          return;
+        }
+        const startYMD = calendar?.selectedYMD || toYMD(new Date());
+        openRoadmapModal();
+        el.roadmapLoading.classList.remove('hidden');
+        el.roadmapMicroText.textContent = '—';
+        el.roadmapTaskList.innerHTML = '';
+        el.roadmapSubtitle.textContent = `输入：${text.length > 36 ? text.slice(0, 36) + '…' : text}`;
+
+        try {
+          roadmapDraft = await aiGenerateRoadmap(text, startYMD);
+        } catch (err) {
+          roadmapDraft = localGenerateRoadmap(text, startYMD);
+          toast(`路线生成失败，已回退本地：${String(err?.message || err)}`, 'warn');
+        } finally {
+          el.roadmapLoading.classList.add('hidden');
+          el.roadmapMicroText.textContent = roadmapDraft.microAction || '—';
+          renderRoadmapTasks();
+        }
+      }
+
       async function generateInboxFromMicroAction() {
         const idea = selectedIdeaId ? state.ideas.find((x) => x.id === selectedIdeaId) : null;
         const actionText = String(el.actionText.textContent || '').trim();
@@ -3388,6 +3670,7 @@
 
         el.launchBtn.addEventListener('click', launchIdea);
         el.taskifyBtn.addEventListener('click', taskifyVoidToCalendar);
+        el.roadmapBtn.addEventListener('click', generateRoadmapFromVoid);
         el.colliderBtn.addEventListener('click', ideaCollider);
         el.startBtn.addEventListener('click', startTimer);
         el.endEarlyBtn.addEventListener('click', () => {
@@ -3531,6 +3814,42 @@
           addIdeaTaskToCalendar(t);
         });
 
+        // roadmap modal
+        const closeRoadmap = () => closeRoadmapModal();
+        el.roadmapBackdrop.addEventListener('click', closeRoadmap);
+        el.roadmapCloseBtn.addEventListener('click', closeRoadmap);
+        el.roadmapCancelBtn.addEventListener('click', closeRoadmap);
+        el.roadmapCopyMicroBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(String(el.roadmapMicroText.textContent || '').trim());
+            toast('已复制微行动。', 'good');
+          } catch {
+            toast('复制失败：浏览器可能禁止剪贴板。', 'warn');
+          }
+        });
+        el.roadmapAddAllBtn.addEventListener('click', addAllRoadmapToCalendar);
+        el.roadmapTaskList.addEventListener('input', (e) => {
+          const target = e.target;
+          const idx = Number(target?.dataset?.roadIdx);
+          const field = target?.dataset?.field;
+          if (Number.isNaN(idx) || !field || !roadmapDraft.tasks?.[idx]) return;
+          if (field === 'durationMin')
+            roadmapDraft.tasks[idx].durationMin = Math.max(5, Math.min(240, Math.round(Number(target.value || 20))));
+          else roadmapDraft.tasks[idx][field] = String(target.value || '');
+        });
+        el.roadmapTaskList.addEventListener('click', (e) => {
+          const btn = e.target?.closest?.('[data-road-add]');
+          if (!btn) return;
+          const idx = Number(btn.getAttribute('data-road-add'));
+          if (Number.isNaN(idx) || !roadmapDraft.tasks?.[idx]) return;
+          addRoadmapTaskToCalendar(roadmapDraft.tasks[idx]);
+          save();
+          renderCalendar();
+          renderDayTasks();
+          renderProgress();
+          toast('已加入日历。', 'good');
+        });
+
         // settings modal
         const openSettings = () => {
           el.settingsModal.classList.remove('hidden');
@@ -3547,6 +3866,7 @@
           if (!el.inboxModal.classList.contains('hidden')) closeInboxModal();
           if (!el.colliderModal.classList.contains('hidden')) closeColliderModal({ clearSelection: true });
           if (!el.ideaTaskModal.classList.contains('hidden')) closeIdeaTaskModal();
+          if (!el.roadmapModal.classList.contains('hidden')) closeRoadmapModal();
           if (!el.settingsModal.classList.contains('hidden')) closeSettings();
         });
 
