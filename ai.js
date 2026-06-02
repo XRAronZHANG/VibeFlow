@@ -8,8 +8,8 @@
  * - DEEPSEEK_API_KEY
  *
  * 可选环境变量：
- * - DEEPSEEK_BASE_URL (默认 https://api.deepseek.com/v1)
- * - DEEPSEEK_MODEL    (默认 deepseek-chat)
+ * - DEEPSEEK_BASE_URL (默认 https://api.deepseek.com)
+ * - DEEPSEEK_MODEL    (默认 deepseek-v4-flash)
  */
 
 const json = (statusCode, body, extraHeaders = {}) => ({
@@ -53,8 +53,8 @@ exports.handler = async (event) => {
   const temperature = Number.isFinite(Number(payload.temperature)) ? Number(payload.temperature) : 0.8;
   const max_tokens = Number.isFinite(Number(payload.max_tokens)) ? Number(payload.max_tokens) : 220;
 
-  const baseUrl = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1').replace(/\/$/, '');
-  const model = String(process.env.DEEPSEEK_MODEL || payload.model || 'deepseek-chat');
+  const baseUrl = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/$/, '');
+  const model = String(process.env.DEEPSEEK_MODEL || payload.model || 'deepseek-v4-flash');
   const url = `${baseUrl}/chat/completions`;
 
   try {
@@ -89,4 +89,3 @@ exports.handler = async (event) => {
     return json(500, { error: 'Proxy error', detail: String(e?.message || e) });
   }
 };
-

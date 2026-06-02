@@ -771,8 +771,8 @@
                     <div class="text-sm font-semibold">设置</div>
                   </div>
                   <div class="mt-1 text-xs leading-relaxed text-slate-300/70">
-                    这里的所有配置都会保存在你的浏览器本地（localStorage）。<br />
-                    注意：把 DeepSeek API Key 存在本地意味着它对同一台电脑上的浏览器用户可见，请自行衡量。
+                    这里的配置会保存在你的浏览器本地（localStorage）。<br />
+                    本站采用 <span class="text-slate-200">Netlify 代理</span>：AI 由站点统一提供，访客无需填写自己的 API Key。
                   </div>
                 </div>
                 <button id="settingsCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
@@ -791,35 +791,9 @@
                     </label>
                   </div>
                   <div class="mt-3 grid gap-3">
-                    <label class="grid gap-1">
-                      <span class="text-xs text-slate-300/70">API Key</span>
-                      <input
-                        id="aiKey"
-                        type="password"
-                        placeholder="sk-...（仅保存在本地）"
-                        class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
-                      />
-                    </label>
-                    <label class="grid gap-1">
-                      <span class="text-xs text-slate-300/70">Base URL</span>
-                      <input
-                        id="aiBaseUrl"
-                        type="text"
-                        placeholder="https://api.deepseek.com/v1"
-                        class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
-                      />
-                    </label>
-                    <label class="grid gap-1">
-                      <span class="text-xs text-slate-300/70">Model</span>
-                      <input
-                        id="aiModel"
-                        type="text"
-                        placeholder="deepseek-chat"
-                        class="w-full rounded-2xl bg-black/25 px-3 py-2 text-sm ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
-                      />
-                    </label>
-                    <div class="text-xs text-slate-300/60">
-                      说明：本页会以 OpenAI 兼容格式调用 <code class="text-slate-200">/chat/completions</code>。若跨域被浏览器阻止，你可能需要用自己的代理/中转（仍保持无后端也可行：比如本地反代）。
+                    <div class="rounded-2xl bg-black/20 px-3 py-2 text-xs text-slate-300/70 ring-1 ring-white/10">
+                      模型由站点统一配置（当前推荐：<span class="text-slate-200">deepseek-v4-flash</span>）。<br />
+                      如果 AI 暂时不可用，应用会自动回退到本地模板，不影响基础使用。
                     </div>
                   </div>
                 </div>
@@ -1104,11 +1078,11 @@
       ];
 
       const DEFAULT_AI = {
-        // 若部署在 Netlify 并配置了后端代理，则默认开启 AI（访客无需 Key）
+        // Netlify 代理模式：统一走站点后端 Key（访客无需 Key）
         enabled: true,
-        apiKey: '',
-        baseUrl: 'https://api.deepseek.com/v1',
-        model: 'deepseek-chat',
+        apiKey: '', // 已不再使用（保留字段做兼容）
+        baseUrl: 'https://api.deepseek.com', // 已不再使用（保留字段做兼容）
+        model: 'deepseek-v4-flash',
         proxyPath: '/.netlify/functions/ai',
       };
 
@@ -1191,9 +1165,6 @@
         settingsSaveBtn: document.getElementById('settingsSaveBtn'),
         settingsResetBtn: document.getElementById('settingsResetBtn'),
         aiEnabled: document.getElementById('aiEnabled'),
-        aiKey: document.getElementById('aiKey'),
-        aiBaseUrl: document.getElementById('aiBaseUrl'),
-        aiModel: document.getElementById('aiModel'),
         tagEditorList: document.getElementById('tagEditorList'),
         addTagBtn: document.getElementById('addTagBtn'),
 
@@ -2395,44 +2366,23 @@
 
       async function deepseekChat(messages, { temperature = 0.8, maxTokens = 220 } = {}) {
         if (!aiReady()) throw new Error('AI 未启用');
-        const apiKey = String(state.ai.apiKey || '').trim();
-        const useProxy = !apiKey; // 没 Key 就走 Netlify 代理
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
 
         try {
-          let res;
-          if (useProxy) {
-            const proxyPath = String(state.ai.proxyPath || '/.netlify/functions/ai');
-            res = await fetch(proxyPath, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                messages,
-                temperature,
-                max_tokens: maxTokens,
-                model: String(state.ai.model || 'deepseek-chat'),
-              }),
-              signal: controller.signal,
-            });
-          } else {
-            const base = String(state.ai.baseUrl || '').replace(/\/$/, '');
-            const url = `${base}/chat/completions`;
-            res = await fetch(url, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${apiKey}`,
-              },
-              body: JSON.stringify({
-                model: String(state.ai.model || 'deepseek-chat'),
-                messages,
-                temperature,
-                max_tokens: maxTokens,
-              }),
-              signal: controller.signal,
-            });
-          }
+          // 强制统一走 Netlify 代理（站点后端 Key）
+          const proxyPath = String(state.ai.proxyPath || '/.netlify/functions/ai');
+          const res = await fetch(proxyPath, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              messages,
+              temperature,
+              max_tokens: maxTokens,
+              model: String(state.ai.model || 'deepseek-v4-flash'),
+            }),
+            signal: controller.signal,
+          });
 
           if (!res.ok) {
             const txt = await res.text().catch(() => '');
@@ -3317,9 +3267,6 @@
         el.settingsSaveBtn.addEventListener('click', () => {
           // AI
           state.ai.enabled = Boolean(el.aiEnabled.checked);
-          state.ai.apiKey = String(el.aiKey.value || '');
-          state.ai.baseUrl = String(el.aiBaseUrl.value || DEFAULT_AI.baseUrl).trim() || DEFAULT_AI.baseUrl;
-          state.ai.model = String(el.aiModel.value || DEFAULT_AI.model).trim() || DEFAULT_AI.model;
 
           // Selected tag guard
           if (!state.tags.some((t) => t.key === state.ui.selectedTag)) state.ui.selectedTag = state.tags[0]?.key || 'crazy';
@@ -3468,9 +3415,6 @@
       function renderSettingsUI() {
         // AI
         el.aiEnabled.checked = Boolean(state.ai.enabled);
-        el.aiKey.value = String(state.ai.apiKey || '');
-        el.aiBaseUrl.value = String(state.ai.baseUrl || DEFAULT_AI.baseUrl);
-        el.aiModel.value = String(state.ai.model || DEFAULT_AI.model);
 
         // Tags
         el.tagEditorList.innerHTML = state.tags
