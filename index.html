@@ -3123,6 +3123,51 @@
         return { days: 7, source: 'default' };
       }
 
+      function tryExtractJsonObject(text) {
+        const s = String(text || '').trim();
+        const direct = safeJsonParse(s, null);
+        if (direct && typeof direct === 'object' && !Array.isArray(direct)) return direct;
+        const m = s.match(/\{[\s\S]*\}/);
+        if (m) {
+          const obj = safeJsonParse(m[0], null);
+          if (obj && typeof obj === 'object' && !Array.isArray(obj)) return obj;
+        }
+        return null;
+      }
+
+      function normalizeRoadmapOutput(obj, text, startYMD, horizonDays) {
+        const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
+        const fallback = localGenerateRoadmap(text, startYMD, h);
+        const microActionRaw = obj && typeof obj === 'object' ? String(obj.microAction || '').trim() : '';
+        const microAction = microActionRaw || fallback.microAction;
+
+        const arr = obj && typeof obj === 'object' && Array.isArray(obj.tasks) ? obj.tasks : [];
+        const tasks = [];
+        for (let i = 0; i < h; i++) {
+          const x = arr[i];
+          const fb = fallback.tasks[i] || { title: `第${i + 1}天任务`, notes: '', date: addDays(startYMD, i), time: '', durationMin: 20 };
+
+          const title = String(x?.title || '').trim();
+          const date = normalizeDateMaybe(x?.date, fb.date);
+          const time = String(x?.time || '').trim();
+          const durationMin = Math.max(5, Math.min(240, Math.round(Number(x?.durationMin || fb.durationMin || 20))));
+          const notes = String(x?.notes || '').trim();
+
+          tasks.push({
+            title: (title || fb.title).slice(0, 60),
+            notes: (notes || fb.notes || '').slice(0, 240),
+            date,
+            time,
+            durationMin,
+          });
+        }
+
+        const usedFallbackMicro = !microActionRaw;
+        const usedFallbackTasks = arr.length < h;
+        const salvaged = usedFallbackMicro || usedFallbackTasks || arr.some((x) => !x || typeof x !== 'object');
+        return { microAction, tasks, salvaged };
+      }
+
       function localGenerateRoadmap(text, startYMD, horizonDays) {
         const y0 = startYMD || toYMD(new Date());
         const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
@@ -3183,19 +3228,10 @@
           { temperature: 0.7, maxTokens: 520 }
         );
 
-        const obj = safeJsonParse(out, null) || safeJsonParse((out.match(/\{[\s\S]*\}/) || [])[0] || '', null);
-        if (!obj || typeof obj !== 'object') throw new Error('AI 输出不是可解析 JSON');
-        const microAction = String(obj.microAction || '').trim();
-        const arr = Array.isArray(obj.tasks) ? obj.tasks : null;
-        if (!microAction || !arr) throw new Error('AI 输出缺少字段');
-        const tasks = arr.slice(0, h).map((x, i) => ({
-          title: String(x?.title || `第${i + 1}天任务`).trim().slice(0, 60),
-          notes: String(x?.notes || '').trim().slice(0, 240),
-          date: normalizeDateMaybe(x?.date, addDays(startYMD, i)),
-          time: String(x?.time || '').trim(),
-          durationMin: Math.max(5, Math.min(240, Math.round(Number(x?.durationMin || 20)))),
-        }));
-        return { microAction, tasks };
+        // 容错解析：只要能抓到大致结构，就尽量“抢救”出来，不轻易全回退模板
+        const obj = tryExtractJsonObject(out);
+        if (!obj) return { ...localGenerateRoadmap(text, startYMD, h), salvaged: true };
+        return normalizeRoadmapOutput(obj, text, startYMD, h);
       }
 
       let roadmapDraft = { microAction: '', tasks: [] };
@@ -3329,6 +3365,7 @@
 
         try {
           roadmapDraft = await aiGenerateRoadmap(text, startYMD, roadmapMeta.usedDays);
+          if (roadmapDraft?.salvaged) toast('AI 输出有点不规整：已自动补齐/纠错。', 'default');
         } catch (err) {
           roadmapDraft = localGenerateRoadmap(text, startYMD, roadmapMeta.usedDays);
           toast(`路线生成失败，已回退本地：${String(err?.message || err)}`, 'warn');
