@@ -3143,6 +3143,7 @@
 
         const arr = obj && typeof obj === 'object' && Array.isArray(obj.tasks) ? obj.tasks : [];
         const tasks = [];
+        let aiTaskTitleCount = 0;
         for (let i = 0; i < h; i++) {
           const x = arr[i];
           const fb = fallback.tasks[i] || { title: `第${i + 1}天任务`, notes: '', date: addDays(startYMD, i), time: '', durationMin: 20 };
@@ -3152,6 +3153,7 @@
           const time = String(x?.time || '').trim();
           const durationMin = Math.max(5, Math.min(240, Math.round(Number(x?.durationMin || fb.durationMin || 20))));
           const notes = String(x?.notes || '').trim();
+          if (title) aiTaskTitleCount += 1;
 
           tasks.push({
             title: (title || fb.title).slice(0, 60),
@@ -3165,7 +3167,8 @@
         const usedFallbackMicro = !microActionRaw;
         const usedFallbackTasks = arr.length < h;
         const salvaged = usedFallbackMicro || usedFallbackTasks || arr.some((x) => !x || typeof x !== 'object');
-        return { microAction, tasks, salvaged };
+        const aiCoverage = aiTaskTitleCount / Math.max(1, h);
+        return { microAction, tasks, salvaged, aiCoverage };
       }
 
       function localGenerateRoadmap(text, startYMD, horizonDays) {
@@ -3175,23 +3178,75 @@
         const short = base.slice(0, 16) + (base.length > 16 ? '…' : '');
         const micro = `目标：${short}\n今日微动：用 ${Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60)} 分钟写下“标题 + 3个要点”，别润色。\n加速器：只求写完，不求写好。`;
 
-        const pool = [
-          { title: `定义成功标准：${short}`, notes: '用一句话写“做成了长什么样”。', durationMin: 20 },
-          { title: `拆成 3 块：${short}`, notes: '每块只要一个“可见证据”。', durationMin: 20 },
-          { title: `找 3 个参考：${short}`, notes: '只截图/收藏，不评价。', durationMin: 20 },
-          { title: `做最小骨架：${short}`, notes: '只做目录/结构/草图。', durationMin: 30 },
-          { title: `产出可见证据：${short}`, notes: '一页文档/一张图/一个可点原型。', durationMin: 45 },
-          { title: `找一个人反馈：${short}`, notes: '只问“哪里不懂”。', durationMin: 15 },
-          { title: `迭代一次：${short}`, notes: '只改最关键的 1 个点。', durationMin: 30 },
-          { title: `收尾/发布：${short}`, notes: '写一句发布文案/提交/发出去。', durationMin: 25 },
-        ];
+        // smarter fallback: try detect quantity & unit (e.g., "2天复习完9个PPT")
+        const qtyMatch =
+          base.match(/(\d+)\s*个\s*(PPT|ppt|幻灯片)/) ||
+          base.match(/(\d+)\s*份\s*(PPT|ppt|幻灯片)/) ||
+          base.match(/(\d+)\s*个\s*(章节|章|小节|节|题|题目|页面|页)/);
+        const qty = qtyMatch ? Math.max(1, Math.round(Number(qtyMatch[1]))) : 0;
+        const unit = qtyMatch ? String(qtyMatch[2] || qtyMatch[0]).replace(/^\d+\s*(个|份)\s*/i, '') : '';
+        const isReview = /复习|背|预习|刷题|看完|读完|学习/.test(base);
 
-        const tasks = Array.from({ length: h }).map((_, i) => {
-          const p = pool[i % pool.length];
-          return { title: p.title, notes: p.notes, date: addDays(y0, i), time: '', durationMin: p.durationMin };
-        });
+        let tasks;
+        if (qty && h <= 14) {
+          // distribute items across days
+          const perDay = Math.ceil(qty / h);
+          let cur = 1;
+          tasks = Array.from({ length: h }).map((_, i) => {
+            const start = cur;
+            const end = Math.min(qty, cur + perDay - 1);
+            cur = end + 1;
+            const range = start === end ? `${start}` : `${start}-${end}`;
+            const title = isReview ? `复习 ${unit || '内容'} ${range}` : `处理 ${unit || '内容'} ${range}`;
+            const notes = isReview ? '每份：过一遍目录→写3条要点→做1次自测。' : '拆成最小步骤做完即可。';
+            return { title: `${title}：${short}`, notes, date: addDays(y0, i), time: '', durationMin: isReview ? 60 : 30 };
+          });
+        } else {
+          const pool = [
+            { title: `定义成功标准：${short}`, notes: '用一句话写“做成了长什么样”。', durationMin: 20 },
+            { title: `拆成 3 块：${short}`, notes: '每块只要一个“可见证据”。', durationMin: 20 },
+            { title: `找 3 个参考：${short}`, notes: '只截图/收藏，不评价。', durationMin: 20 },
+            { title: `做最小骨架：${short}`, notes: '只做目录/结构/草图。', durationMin: 30 },
+            { title: `产出可见证据：${short}`, notes: '一页文档/一张图/一个可点原型。', durationMin: 45 },
+            { title: `找一个人反馈：${short}`, notes: '只问“哪里不懂”。', durationMin: 15 },
+            { title: `迭代一次：${short}`, notes: '只改最关键的 1 个点。', durationMin: 30 },
+            { title: `收尾/发布：${short}`, notes: '写一句发布文案/提交/发出去。', durationMin: 25 },
+          ];
+          tasks = Array.from({ length: h }).map((_, i) => {
+            const p = pool[i % pool.length];
+            return { title: p.title, notes: p.notes, date: addDays(y0, i), time: '', durationMin: p.durationMin };
+          });
+        }
 
         return { microAction: micro, tasks };
+      }
+
+      async function aiRepairRoadmapJson(rawText, startYMD, horizonDays) {
+        const today = toYMD(new Date());
+        const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
+        const system =
+          '你是“JSON 修复器”。用户会给你一段可能不规整的模型输出。你的任务是把它改写成严格 JSON，且必须符合字段与数量要求。只输出 JSON。';
+        const user = [
+          `今天日期：${today}`,
+          `起始日期：${startYMD}`,
+          `计划跨度（天）：${h}`,
+          '',
+          '请输出严格 JSON：{"microAction":"...","tasks":[...]}',
+          '其中 tasks 长度必须等于跨度，每项字段严格为：title, notes, date, time, durationMin。',
+          'date 必须是 YYYY-MM-DD；time 可为空字符串。',
+          '',
+          '下面是需要你修复的原始输出：',
+          String(rawText || ''),
+        ].join('\n');
+
+        const out = await deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.2, maxTokens: 520 }
+        );
+        return out;
       }
 
       async function aiGenerateRoadmap(text, startYMD, horizonDays) {
@@ -3220,6 +3275,7 @@
           '只输出 JSON。不要 markdown。不要解释。',
         ].join('\n');
 
+        // 主请求（尽量生成严格 JSON）
         const out = await deepseekChat(
           [
             { role: 'system', content: system },
@@ -3229,9 +3285,22 @@
         );
 
         // 容错解析：只要能抓到大致结构，就尽量“抢救”出来，不轻易全回退模板
-        const obj = tryExtractJsonObject(out);
-        if (!obj) return { ...localGenerateRoadmap(text, startYMD, h), salvaged: true };
-        return normalizeRoadmapOutput(obj, text, startYMD, h);
+        let obj = tryExtractJsonObject(out);
+        let normalized = obj ? normalizeRoadmapOutput(obj, text, startYMD, h) : null;
+
+        // 若解析失败 or AI 覆盖率太低 → 再请求一次“修复 JSON”
+        if (!obj || (normalized && normalized.aiCoverage < 0.5)) {
+          try {
+            const repaired = await aiRepairRoadmapJson(out, startYMD, h);
+            obj = tryExtractJsonObject(repaired);
+            if (obj) normalized = normalizeRoadmapOutput(obj, text, startYMD, h);
+          } catch {
+            // ignore: will fallback below
+          }
+        }
+
+        if (!obj || !normalized) return { ...localGenerateRoadmap(text, startYMD, h), salvaged: true, aiCoverage: 0 };
+        return normalized;
       }
 
       let roadmapDraft = { microAction: '', tasks: [] };
