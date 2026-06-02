@@ -1139,11 +1139,26 @@
             <div class="relative p-5 sm:p-6">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <div class="flex items-center gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
                     <i data-lucide="sparkles" class="h-4 w-4 text-neon-gold"></i>
-                    <div class="text-sm font-semibold">给我一条路 · 7 天推进路线</div>
+                    <div id="roadmapTitle" class="text-sm font-semibold">给我一条路 · 未来 7 天</div>
+                    <div class="ml-auto flex items-center gap-2 text-xs text-slate-300/70">
+                      <span class="text-slate-300/60">跨度</span>
+                      <select
+                        id="roadmapHorizonSelect"
+                        class="rounded-2xl bg-black/25 px-2 py-1 text-xs font-semibold ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                        title="自动识别期限；也可以手动切换"
+                      >
+                        <option value="auto" selected>自动</option>
+                        <option value="2">2天</option>
+                        <option value="7">7天</option>
+                        <option value="14">14天</option>
+                      </select>
+                    </div>
                   </div>
-                  <div id="roadmapSubtitle" class="mt-1 text-xs text-slate-300/70">把一句话变成：现在能做的一步 + 未来 7 天的落地任务。</div>
+                  <div id="roadmapSubtitle" class="mt-1 text-xs text-slate-300/70">
+                    把一句话变成：现在能做的一步 + 可直接入历的任务路线。
+                  </div>
                 </div>
                 <button id="roadmapCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
                   <i data-lucide="x" class="h-4 w-4"></i>
@@ -1174,7 +1189,7 @@
 
                 <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
                   <div class="flex items-center justify-between gap-3">
-                    <div class="text-sm font-semibold">未来 7 天</div>
+                    <div id="roadmapHorizonLabel" class="text-sm font-semibold">未来 7 天</div>
                     <button
                       id="roadmapAddAllBtn"
                       class="inline-flex items-center gap-2 rounded-2xl bg-emerald-400/80 px-3 py-2 text-xs font-semibold text-emerald-950 shadow-glowE hover:brightness-110 transition active:scale-[0.99]"
@@ -1401,11 +1416,14 @@
         roadmapBackdrop: document.getElementById('roadmapBackdrop'),
         roadmapCloseBtn: document.getElementById('roadmapCloseBtn'),
         roadmapCancelBtn: document.getElementById('roadmapCancelBtn'),
+        roadmapTitle: document.getElementById('roadmapTitle'),
         roadmapSubtitle: document.getElementById('roadmapSubtitle'),
+        roadmapHorizonSelect: document.getElementById('roadmapHorizonSelect'),
         roadmapLoading: document.getElementById('roadmapLoading'),
         roadmapMicroText: document.getElementById('roadmapMicroText'),
         roadmapCopyMicroBtn: document.getElementById('roadmapCopyMicroBtn'),
         roadmapAddAllBtn: document.getElementById('roadmapAddAllBtn'),
+        roadmapHorizonLabel: document.getElementById('roadmapHorizonLabel'),
         roadmapTaskList: document.getElementById('roadmapTaskList'),
       };
 
@@ -3058,31 +3076,89 @@
         }
       }
 
-      function localGenerateRoadmap(text, startYMD) {
+      function detectHorizonDays(text, startYMD) {
+        const base = String(text || '');
+        const start = fromYMD(startYMD || toYMD(new Date()));
+        const MS_DAY = 24 * 60 * 60 * 1000;
+
+        // 1) 显式 “N天”
+        const mDays = base.match(/(\d{1,2})\s*天/);
+        if (mDays) return { days: Math.max(1, Number(mDays[1])), source: 'days' };
+
+        // 2) 今天/明天/后天
+        if (base.includes('后天')) return { days: 3, source: 'relative' };
+        if (base.includes('明天')) return { days: 2, source: 'relative' };
+        if (base.includes('今天')) return { days: 1, source: 'relative' };
+
+        // 3) 具体日期：YYYY-MM-DD / MM-DD / M月D日
+        let ymd = null;
+        const mYMD = base.match(/\b(\d{4}-\d{1,2}-\d{1,2})\b/);
+        if (mYMD) {
+          const s = mYMD[1].replace(/-(\d)\b/g, '-0$1');
+          ymd = normalizeDateMaybe(s, startYMD);
+        } else {
+          const mMD = base.match(/\b(\d{1,2})-(\d{1,2})\b/);
+          if (mMD) {
+            const year = start.getFullYear();
+            const mm = String(Number(mMD[1])).padStart(2, '0');
+            const dd = String(Number(mMD[2])).padStart(2, '0');
+            ymd = normalizeDateMaybe(`${year}-${mm}-${dd}`, startYMD);
+          } else {
+            const mCN = base.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]/);
+            if (mCN) {
+              const year = start.getFullYear();
+              const mm = String(Number(mCN[1])).padStart(2, '0');
+              const dd = String(Number(mCN[2])).padStart(2, '0');
+              ymd = normalizeDateMaybe(`${year}-${mm}-${dd}`, startYMD);
+            }
+          }
+        }
+
+        if (ymd) {
+          const end = fromYMD(ymd);
+          const diff = Math.round((end.getTime() - start.getTime()) / MS_DAY);
+          return { days: Math.max(1, diff + 1), source: 'date' };
+        }
+
+        return { days: 7, source: 'default' };
+      }
+
+      function localGenerateRoadmap(text, startYMD, horizonDays) {
         const y0 = startYMD || toYMD(new Date());
+        const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
         const base = String(text || '').trim();
         const short = base.slice(0, 16) + (base.length > 16 ? '…' : '');
         const micro = `目标：${short}\n今日微动：用 ${Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60)} 分钟写下“标题 + 3个要点”，别润色。\n加速器：只求写完，不求写好。`;
-        const tasks = [
-          { title: `定义成功标准：${short}`, notes: '用一句话写“做成了长什么样”。', date: y0, time: '', durationMin: 20 },
-          { title: `找 3 个参考：${short}`, notes: '只截图/收藏，不评价。', date: addDays(y0, 1), time: '', durationMin: 20 },
-          { title: `做最小骨架：${short}`, notes: '只做目录/结构/草图。', date: addDays(y0, 2), time: '', durationMin: 30 },
-          { title: `产出一个可见证据：${short}`, notes: '一页文档/一张图/一个可点原型。', date: addDays(y0, 3), time: '', durationMin: 45 },
-          { title: `找一个人反馈：${short}`, notes: '发给朋友/同事：只问“哪里不懂”。', date: addDays(y0, 4), time: '', durationMin: 15 },
-          { title: `迭代一次：${short}`, notes: '只改最关键的 1 个点。', date: addDays(y0, 5), time: '', durationMin: 30 },
-          { title: `收尾/发布：${short}`, notes: '写一句发布文案/提交/发出去。', date: addDays(y0, 6), time: '', durationMin: 25 },
+
+        const pool = [
+          { title: `定义成功标准：${short}`, notes: '用一句话写“做成了长什么样”。', durationMin: 20 },
+          { title: `拆成 3 块：${short}`, notes: '每块只要一个“可见证据”。', durationMin: 20 },
+          { title: `找 3 个参考：${short}`, notes: '只截图/收藏，不评价。', durationMin: 20 },
+          { title: `做最小骨架：${short}`, notes: '只做目录/结构/草图。', durationMin: 30 },
+          { title: `产出可见证据：${short}`, notes: '一页文档/一张图/一个可点原型。', durationMin: 45 },
+          { title: `找一个人反馈：${short}`, notes: '只问“哪里不懂”。', durationMin: 15 },
+          { title: `迭代一次：${short}`, notes: '只改最关键的 1 个点。', durationMin: 30 },
+          { title: `收尾/发布：${short}`, notes: '写一句发布文案/提交/发出去。', durationMin: 25 },
         ];
+
+        const tasks = Array.from({ length: h }).map((_, i) => {
+          const p = pool[i % pool.length];
+          return { title: p.title, notes: p.notes, date: addDays(y0, i), time: '', durationMin: p.durationMin };
+        });
+
         return { microAction: micro, tasks };
       }
 
-      async function aiGenerateRoadmap(text, startYMD) {
+      async function aiGenerateRoadmap(text, startYMD, horizonDays) {
         const durationMin = Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60);
         const today = toYMD(new Date());
+        const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
         const system =
-          '你是一个极简但很会推进的“7天落地路线”教练：把用户一句话目标变成一个现在就能做的微行动，以及未来7天的可安排任务。输出必须是严格 JSON，不要任何多余文字。';
+          '你是一个极简但很会推进的“落地路线”教练：把用户一句话目标变成一个现在就能做的微行动，以及按指定天数铺排的可安排任务。输出必须是严格 JSON，不要任何多余文字。';
         const user = [
           `今天日期：${today}`,
           `起始日期（用于铺排未来7天）：${startYMD}`,
+          `计划跨度（天）：${h}`,
           '',
           `用户输入：${String(text || '').trim()}`,
           '',
@@ -3091,9 +3167,9 @@
           '',
           '规则：',
           `1) microAction 必须是三行，格式严格为：目标/今日微动/加速器，并且今日微动不超过 ${durationMin} 分钟`,
-          '2) tasks 长度必须是 7',
+          '2) tasks 长度必须等于“计划跨度（天）”',
           '3) 每个 task 字段严格为：title, notes, date, time, durationMin',
-          '4) date 必须是 YYYY-MM-DD，按起始日期开始连续铺 7 天（可以跳一天但总数仍是7）',
+          '4) date 必须是 YYYY-MM-DD，按起始日期开始铺满跨度天数（总长度等于跨度）',
           '5) time 可为空字符串；durationMin 为 5~240 的整数',
           '6) title <= 22字，notes <= 60字，务必可执行、不要空泛',
           '只输出 JSON。不要 markdown。不要解释。',
@@ -3112,7 +3188,7 @@
         const microAction = String(obj.microAction || '').trim();
         const arr = Array.isArray(obj.tasks) ? obj.tasks : null;
         if (!microAction || !arr) throw new Error('AI 输出缺少字段');
-        const tasks = arr.slice(0, 7).map((x, i) => ({
+        const tasks = arr.slice(0, h).map((x, i) => ({
           title: String(x?.title || `第${i + 1}天任务`).trim().slice(0, 60),
           notes: String(x?.notes || '').trim().slice(0, 240),
           date: normalizeDateMaybe(x?.date, addDays(startYMD, i)),
@@ -3123,6 +3199,7 @@
       }
 
       let roadmapDraft = { microAction: '', tasks: [] };
+      let roadmapMeta = { text: '', startYMD: '', detectedDays: 7, usedDays: 7, capped: false, source: 'default' };
 
       function openRoadmapModal() {
         el.roadmapModal.classList.remove('hidden');
@@ -3208,7 +3285,7 @@
         renderCalendar();
         renderDayTasks();
         renderProgress();
-        toast('已一键入历：未来 7 天已铺好。', 'good');
+        toast(`已一键入历：${tasks.length} 天路线已铺好。`, 'good');
         closeRoadmapModal();
       }
 
@@ -3219,16 +3296,41 @@
           return;
         }
         const startYMD = calendar?.selectedYMD || toYMD(new Date());
+        roadmapMeta.text = text;
+        roadmapMeta.startYMD = startYMD;
+
+        const det = detectHorizonDays(text, startYMD);
+        roadmapMeta.detectedDays = det.days;
+        roadmapMeta.source = det.source;
+
+        const selectVal = String(el.roadmapHorizonSelect?.value || 'auto');
+        let used = selectVal === 'auto' ? det.days : Math.round(Number(selectVal || det.days));
+        used = Math.max(1, used);
+        roadmapMeta.capped = used > 14;
+        roadmapMeta.usedDays = Math.min(14, used);
+
+        // header labels
+        const label =
+          selectVal !== 'auto'
+            ? `路线（${roadmapMeta.usedDays}天）`
+            : roadmapMeta.source === 'default'
+              ? `未来 ${roadmapMeta.usedDays} 天`
+              : `到期路线（${roadmapMeta.usedDays}天）`;
+        if (el.roadmapTitle) el.roadmapTitle.textContent = `给我一条路 · ${label}`;
+        if (el.roadmapHorizonLabel) el.roadmapHorizonLabel.textContent = label;
+
         openRoadmapModal();
         el.roadmapLoading.classList.remove('hidden');
         el.roadmapMicroText.textContent = '—';
         el.roadmapTaskList.innerHTML = '';
-        el.roadmapSubtitle.textContent = `输入：${text.length > 36 ? text.slice(0, 36) + '…' : text}`;
+        el.roadmapSubtitle.textContent = `输入：${text.length > 36 ? text.slice(0, 36) + '…' : text}${
+          roadmapMeta.capped ? '（期限较长，先生成前 14 天）' : ''
+        }`;
 
         try {
-          roadmapDraft = await aiGenerateRoadmap(text, startYMD);
+          roadmapDraft = await aiGenerateRoadmap(text, startYMD, roadmapMeta.usedDays);
         } catch (err) {
-          roadmapDraft = localGenerateRoadmap(text, startYMD);
+          roadmapDraft = localGenerateRoadmap(text, startYMD, roadmapMeta.usedDays);
           toast(`路线生成失败，已回退本地：${String(err?.message || err)}`, 'warn');
         } finally {
           el.roadmapLoading.classList.add('hidden');
@@ -3819,6 +3921,11 @@
         el.roadmapBackdrop.addEventListener('click', closeRoadmap);
         el.roadmapCloseBtn.addEventListener('click', closeRoadmap);
         el.roadmapCancelBtn.addEventListener('click', closeRoadmap);
+        el.roadmapHorizonSelect.addEventListener('change', () => {
+          // 若已经生成过路线，则切换跨度后立刻重新生成（保持同一段输入）
+          if (!roadmapMeta?.text) return;
+          generateRoadmapFromVoid();
+        });
         el.roadmapCopyMicroBtn.addEventListener('click', async () => {
           try {
             await navigator.clipboard.writeText(String(el.roadmapMicroText.textContent || '').trim());
