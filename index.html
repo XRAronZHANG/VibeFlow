@@ -1104,10 +1104,12 @@
       ];
 
       const DEFAULT_AI = {
-        enabled: false,
+        // 若部署在 Netlify 并配置了后端代理，则默认开启 AI（访客无需 Key）
+        enabled: true,
         apiKey: '',
         baseUrl: 'https://api.deepseek.com/v1',
         model: 'deepseek-chat',
+        proxyPath: '/.netlify/functions/ai',
       };
 
       /** @type {{ ideas: any[], merit: number, tags: any[], ai: any, tasks: any[], inbox: any[], stats: any, weather: any, ui: { selectedTag: string, graveOpen: boolean, durationSec: number } }} */
@@ -2388,37 +2390,57 @@
       }
 
       function aiReady() {
-        return Boolean(state.ai?.enabled) && Boolean(String(state.ai?.apiKey || '').trim());
+        return Boolean(state.ai?.enabled);
       }
 
       async function deepseekChat(messages, { temperature = 0.8, maxTokens = 220 } = {}) {
-        if (!aiReady()) throw new Error('AI 未启用或缺少 API Key');
-        const base = String(state.ai.baseUrl || '').replace(/\/$/, '');
-        const url = `${base}/chat/completions`;
-
+        if (!aiReady()) throw new Error('AI 未启用');
+        const apiKey = String(state.ai.apiKey || '').trim();
+        const useProxy = !apiKey; // 没 Key 就走 Netlify 代理
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 12000);
+
         try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${String(state.ai.apiKey).trim()}`,
-            },
-            body: JSON.stringify({
-              model: String(state.ai.model || 'deepseek-chat'),
-              messages,
-              temperature,
-              max_tokens: maxTokens,
-            }),
-            signal: controller.signal,
-          });
+          let res;
+          if (useProxy) {
+            const proxyPath = String(state.ai.proxyPath || '/.netlify/functions/ai');
+            res = await fetch(proxyPath, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                messages,
+                temperature,
+                max_tokens: maxTokens,
+                model: String(state.ai.model || 'deepseek-chat'),
+              }),
+              signal: controller.signal,
+            });
+          } else {
+            const base = String(state.ai.baseUrl || '').replace(/\/$/, '');
+            const url = `${base}/chat/completions`;
+            res = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify({
+                model: String(state.ai.model || 'deepseek-chat'),
+                messages,
+                temperature,
+                max_tokens: maxTokens,
+              }),
+              signal: controller.signal,
+            });
+          }
+
           if (!res.ok) {
             const txt = await res.text().catch(() => '');
             throw new Error(`HTTP ${res.status} ${txt ? `· ${txt.slice(0, 160)}` : ''}`);
           }
           const data = await res.json();
-          const content = data?.choices?.[0]?.message?.content;
+          // 代理返回 {content}；直连返回 OpenAI 兼容 {choices[0].message.content}
+          const content = data?.content ?? data?.choices?.[0]?.message?.content;
           if (!content) throw new Error('AI 返回为空');
           return String(content).trim();
         } finally {
