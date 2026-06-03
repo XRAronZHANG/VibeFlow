@@ -311,11 +311,11 @@
                     <button
                       id="nextStepsBtn"
                       class="group relative inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white/5 px-5 py-3 text-sm font-semibold text-slate-200 ring-1 ring-white/10 shadow-soft transition hover:bg-white/8 active:scale-[0.98]"
-                      title="生成 3 个“下一步任务候选”→ 放入收集箱（可编辑后入历）"
+                      title="让 AI 生成一段可行路径（步骤清单），你可以把其中任一步加入收集箱"
                     >
                       <span class="relative inline-flex items-center gap-2">
-                        <i data-lucide="inbox" class="h-4 w-4 text-neon-gold"></i>
-                        下一步候选
+                        <i data-lucide="sparkles" class="h-4 w-4 text-neon-gold"></i>
+                        AI 给条路
                       </span>
                     </button>
                   </div>
@@ -476,10 +476,10 @@
                         id="ideaToInboxBtn"
                         class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
                         disabled
-                        title="把 3 个“下一步任务候选”放进收集箱（可编辑后入历）"
+                        title="让 AI 基于这颗星生成一段可行路径（步骤清单），并可把任一步加入收集箱"
                       >
-                        <i data-lucide="inbox" class="h-4 w-4 text-neon-gold"></i>
-                        候选→收集箱
+                        <i data-lucide="sparkles" class="h-4 w-4 text-neon-gold"></i>
+                        AI 给条路
                       </button>
 
                       <button
@@ -1135,6 +1135,86 @@
       </div>
     </div>
 
+    <!-- AI Path Modal (Reference-only, optional add-to-inbox) -->
+    <div id="pathModal" class="fixed inset-0 z-50 hidden">
+      <div id="pathBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+          <div class="relative overflow-hidden rounded-3xl bg-space-850/95 ring-1 ring-white/10 shadow-soft">
+            <div class="pointer-events-none absolute inset-0">
+              <div class="absolute -top-24 -left-10 h-64 w-64 rounded-full bg-neon-gold/10 blur-3xl"></div>
+              <div class="absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-violet-500/12 blur-3xl"></div>
+            </div>
+
+            <div class="relative p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="sparkles" class="h-4 w-4 text-neon-gold"></i>
+                    <div class="text-sm font-semibold">AI 给条路 · 路径参考</div>
+                  </div>
+                  <div id="pathSubtitle" class="mt-1 text-xs text-slate-300/70">你可以把任一步加入收集箱（再编辑后入历）。</div>
+                </div>
+                <button id="pathCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <div class="mt-5 grid gap-4">
+                <div id="pathLoading" class="hidden rounded-3xl border border-white/10 bg-white/[0.03] p-5 text-sm text-slate-300/80">
+                  正在生成路径…（DeepSeek）
+                </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="flex items-center justify-between gap-3">
+                    <div class="text-sm font-semibold">路径（参考）</div>
+                    <button
+                      id="pathAddAllBtn"
+                      class="inline-flex items-center gap-2 rounded-2xl bg-emerald-400/80 px-3 py-2 text-xs font-semibold text-emerald-950 shadow-glowE hover:brightness-110 transition active:scale-[0.99]"
+                      title="把当前解析到的所有步骤加入收集箱"
+                    >
+                      <i data-lucide="inbox" class="h-4 w-4"></i>
+                      全部进收集箱
+                    </button>
+                  </div>
+                  <div class="mt-3 text-xs text-slate-300/70">若 AI 输出不规整，也没关系：你可以自己改成“每行一步”，再点每步的加入按钮。</div>
+                  <textarea
+                    id="pathRaw"
+                    rows="8"
+                    class="mt-3 w-full rounded-2xl bg-black/25 px-3 py-2 text-sm text-slate-100 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                    placeholder="AI 输出会显示在这里；你也可以手动改成“每行一步”。"
+                  ></textarea>
+                  <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+                    <button
+                      id="pathParseBtn"
+                      class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                      title="把上面的文本按行解析成步骤"
+                    >
+                      <i data-lucide="list-checks" class="h-4 w-4"></i>
+                      解析为步骤
+                    </button>
+                    <div class="text-xs text-slate-300/60">提示：每行一个动作，会更好解析。</div>
+                  </div>
+
+                  <div id="pathSteps" class="mt-4 grid gap-3"></div>
+                </div>
+              </div>
+
+              <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
+                <button
+                  id="pathCancelBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                >
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                  关闭
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       /***********************
        * VibeFlow (Local-First)
@@ -1293,6 +1373,18 @@
         inboxList: document.getElementById('inboxList'),
         inboxEmpty: document.getElementById('inboxEmpty'),
         inboxAddManualBtn: document.getElementById('inboxAddManualBtn'),
+
+        // AI path modal
+        pathModal: document.getElementById('pathModal'),
+        pathBackdrop: document.getElementById('pathBackdrop'),
+        pathCloseBtn: document.getElementById('pathCloseBtn'),
+        pathCancelBtn: document.getElementById('pathCancelBtn'),
+        pathSubtitle: document.getElementById('pathSubtitle'),
+        pathLoading: document.getElementById('pathLoading'),
+        pathRaw: document.getElementById('pathRaw'),
+        pathParseBtn: document.getElementById('pathParseBtn'),
+        pathAddAllBtn: document.getElementById('pathAddAllBtn'),
+        pathSteps: document.getElementById('pathSteps'),
 
         // task modal
         taskModal: document.getElementById('taskModal'),
@@ -3038,78 +3130,6 @@
         return null;
       }
 
-      function detectQuantityAndUnit(text) {
-        const s = String(text || '');
-        const match =
-          s.match(/(\d+)\s*个\s*(PPT|ppt|幻灯片)/) ||
-          s.match(/(\d+)\s*份\s*(PPT|ppt|幻灯片)/) ||
-          s.match(/(\d+)\s*个\s*(章节|章|小节|节|题|题目|页面|页)/);
-        const qty = match ? Math.max(1, Math.round(Number(match[1]))) : 0;
-        const unit = match ? String(match[2] || '').trim() : '';
-        const isStudy = /复习|背|预习|刷题|看完|读完|学习|记忆|考试/.test(s);
-        return { qty, unit, isStudy };
-      }
-
-      function localNextStepCandidatesFromText(text, startYMD) {
-        const y0 = startYMD || toYMD(new Date());
-        const base = String(text || '').trim();
-        const short = base.slice(0, 16) + (base.length > 16 ? '…' : '');
-        const { qty, unit, isStudy } = detectQuantityAndUnit(base);
-        const { days } = detectHorizonDays(base, y0);
-        const d = Math.max(1, Math.min(14, days || 7));
-
-        if (qty && isStudy) {
-          const perDay = Math.ceil(qty / Math.max(1, Math.min(d, 7)));
-          const aEnd = Math.min(qty, perDay);
-          const bStart = aEnd + 1;
-          const bEnd = Math.min(qty, bStart + perDay - 1);
-          const u = unit || '内容';
-          return [
-            {
-              title: `列清单+排班：${short}`,
-              notes: `把 ${qty} 个${u}列出来，标“难/中/易”，分配到 ${d} 天。`,
-              date: y0,
-              time: '',
-              durationMin: 15,
-            },
-            {
-              title: `复习 ${u} 1-${aEnd}：${short}`,
-              notes: '每份：过目录→写3条要点→做1次自测。',
-              date: y0,
-              time: '',
-              durationMin: 60,
-            },
-            {
-              title: bStart <= qty ? `复习 ${u} ${bStart}-${bEnd}：${short}` : `自测+补缺口：${short}`,
-              notes: bStart <= qty ? '同上，最后 5 分钟写一张“错题/易忘点卡”。' : '做 10 分钟自测，补 3 个最不牢的点。',
-              date: addDays(y0, Math.min(1, d - 1)),
-              time: '',
-              durationMin: 60,
-            },
-          ];
-        }
-
-        if (isStudy) {
-          return [
-            { title: `列目录+重点：${short}`, notes: '先扫一遍目录，把 3 个最可能考/最关键点标出来。', date: y0, time: '', durationMin: 20 },
-            { title: `第一遍复习：${short}`, notes: '只求覆盖：每节写 1 句“我懂了什么”。', date: y0, time: '', durationMin: 45 },
-            {
-              title: `自测+错点卡：${short}`,
-              notes: '把最不牢的 5 个点写成 5 张小卡（问答式）。',
-              date: addDays(y0, 1),
-              time: '',
-              durationMin: 25,
-            },
-          ];
-        }
-
-        return [
-          { title: `定义成功标准：${short}`, notes: '用一句话写“做成了长什么样”。', date: y0, time: '', durationMin: 15 },
-          { title: `找 3 个参考：${short}`, notes: '只截图/收藏，不评价。', date: addDays(y0, 1), time: '', durationMin: 20 },
-          { title: `做最小骨架：${short}`, notes: '只做目录/结构/草图/最丑按钮。', date: addDays(y0, 2), time: '', durationMin: 30 },
-        ];
-      }
-
       function pushInboxSuggestions(suggestions, source = 'local') {
         const items = (suggestions || []).map((s) => ({
           id: uid(),
@@ -3128,31 +3148,156 @@
         return items.length;
       }
 
-      function nextStepsFromVoidToInbox() {
-        const text = String(el.ideaInput.value || '').trim();
-        if (!text) {
-          toast('先写一句话，再点“下一步候选”。', 'warn');
-          return;
+      function parsePathSteps(rawText, maxSteps = 14) {
+        const s = String(rawText || '').trim();
+        if (!s) return [];
+        const lines = s
+          .split('\n')
+          .map((x) => x.trim())
+          .filter(Boolean)
+          .map((x) => x.replace(/^[-*•]\s+/, '').replace(/^\d+\s*[\).、-]\s*/, '').replace(/^Day\s*\d+\s*[:：]\s*/i, ''))
+          .filter(Boolean);
+        // if AI output is one paragraph, fallback split by punctuation
+        const base = lines.length >= 2 ? lines : s.split(/；|。|\.\s+/).map((x) => x.trim()).filter(Boolean);
+        const uniq = [];
+        for (const x of base) {
+          if (!uniq.some((u) => u === x)) uniq.push(x);
+          if (uniq.length >= maxSteps) break;
         }
-        const y0 = calendar?.selectedYMD || toYMD(new Date());
-        const suggestions = localNextStepCandidatesFromText(text, y0);
-        const n = pushInboxSuggestions(suggestions, 'local');
+        return uniq;
+      }
+
+      async function aiGeneratePathReference(text, horizonDays, contextHint = '') {
+        const today = toYMD(new Date());
+        const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
+        const system =
+          '你是一位非常务实的“行动路径教练”。请把用户输入转成一段可行的步骤清单（供参考）。输出必须是中文、简洁、可执行。不要使用 Markdown 代码块。';
+        const user = [
+          `今天日期：${today}`,
+          `请给出 ${h} 步以内的路径（尽量贴合用户给的期限/数量）。`,
+          '输出格式：每行一步，使用 1. 2. 3. 编号。',
+          '每一步尽量像任务标题一样短（<= 22 字），必要信息放在括号里。',
+          contextHint ? `补充上下文：${contextHint}` : '',
+          '',
+          `用户输入：${String(text || '').trim()}`,
+        ]
+          .filter(Boolean)
+          .join('\n');
+        return deepseekChat(
+          [
+            { role: 'system', content: system },
+            { role: 'user', content: user },
+          ],
+          { temperature: 0.75, maxTokens: 420 }
+        );
+      }
+
+      let pathDraft = { source: 'void', input: '', startYMD: '', horizonDays: 7, steps: [] };
+
+      function openPathModal() {
+        el.pathModal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+
+      function closePathModal() {
+        el.pathModal.classList.add('hidden');
+        pathDraft = { source: 'void', input: '', startYMD: '', horizonDays: 7, steps: [] };
+      }
+
+      function assignDatesToSteps(steps, startYMD, horizonDays) {
+        const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
+        return steps.map((t, i) => {
+          const date = i < h ? addDays(startYMD, i) : '';
+          return { title: t, date };
+        });
+      }
+
+      function renderPathSteps() {
+        const steps = pathDraft.steps || [];
+        el.pathSteps.innerHTML = steps
+          .map((s, idx) => {
+            return `
+              <div class="flex flex-wrap items-center justify-between gap-2 rounded-3xl bg-white/[0.03] ring-1 ring-white/10 p-4">
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-slate-100">${escapeHtml(s.title)}</div>
+                  <div class="mt-1 text-xs text-slate-300/70">
+                    ${s.date ? `建议日期：<span class="tabular-nums text-slate-200">${escapeHtml(s.date)}</span>` : '建议日期：不强制（你可以自行安排）'}
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    data-path-add="${idx}"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                  >
+                    <i data-lucide="inbox" class="h-4 w-4"></i>
+                    加入收集箱
+                  </button>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+        lucide.createIcons();
+      }
+
+      function buildInboxItemsFromSteps(steps, input) {
+        return steps.map((s, i) => ({
+          title: s.title,
+          notes: `来源：AI 给条路\n原输入：${String(input || '').slice(0, 180)}\n步骤：第 ${i + 1} 步`,
+          date: s.date || '',
+          time: '',
+          durationMin: 25,
+        }));
+      }
+
+      function addPathStepToInbox(idx) {
+        const step = pathDraft.steps?.[idx];
+        if (!step) return;
+        const items = buildInboxItemsFromSteps([step], pathDraft.input);
+        const n = pushInboxSuggestions(items, 'ai');
+        if (n) toast('已加入收集箱。', 'good');
+      }
+
+      function addAllPathStepsToInbox() {
+        const steps = pathDraft.steps || [];
+        if (!steps.length) return;
+        const items = buildInboxItemsFromSteps(steps, pathDraft.input);
+        const n = pushInboxSuggestions(items, 'ai');
         if (n) {
           openInboxModal();
-          toast(`已生成 ${n} 个候选 → 已放入收集箱。`, 'good');
+          toast(`已加入收集箱：${n} 步。`, 'good');
         }
       }
 
-      function nextStepsFromSelectedIdeaToInbox() {
-        const idea = selectedIdeaId ? state.ideas.find((x) => x.id === selectedIdeaId) : null;
-        if (!idea) return;
-        const actionText = String(el.actionText.textContent || '').trim();
-        const y0 = calendar?.selectedYMD || toYMD(new Date());
-        const suggestions = localSuggestTasksFromIdea(idea, actionText, y0);
-        const n = pushInboxSuggestions(suggestions, 'local');
-        if (n) {
-          openInboxModal();
-          toast(`已生成 ${n} 个候选 → 已放入收集箱。`, 'good');
+      async function openPathFromText(text, contextHint = '', source = 'void') {
+        const input = String(text || '').trim();
+        if (!input) {
+          toast('先写一句话，再点“AI 给条路”。', 'warn');
+          return;
+        }
+        const startYMD = calendar?.selectedYMD || toYMD(new Date());
+        const det = detectHorizonDays(input, startYMD);
+        const horizonDays = Math.max(1, Math.min(14, det.days || 7));
+
+        pathDraft = { source, input, startYMD, horizonDays, steps: [] };
+        openPathModal();
+        el.pathLoading.classList.remove('hidden');
+        el.pathRaw.value = '';
+        el.pathSteps.innerHTML = '';
+        el.pathSubtitle.textContent = `输入：${input.length > 48 ? input.slice(0, 48) + '…' : input}（建议步数：≤${horizonDays}）`;
+
+        try {
+          const out = await aiGeneratePathReference(input, horizonDays, contextHint);
+          el.pathRaw.value = out;
+        } catch (err) {
+          el.pathRaw.value = `AI 暂时不可用（${String(err?.message || err)}）。\n你可以把自己的路径写成“每行一步”，然后点击「解析为步骤」。`;
+          toast('AI 暂时不可用：你仍可手动写步骤并加入收集箱。', 'warn');
+        } finally {
+          el.pathLoading.classList.add('hidden');
+          // auto parse once
+          const stepsText = parsePathSteps(el.pathRaw.value, 14);
+          pathDraft.steps = assignDatesToSteps(stepsText, startYMD, horizonDays);
+          renderPathSteps();
         }
       }
 
@@ -3592,7 +3737,7 @@
 
         el.launchBtn.addEventListener('click', launchIdea);
         el.taskifyBtn.addEventListener('click', taskifyVoidToCalendar);
-        el.nextStepsBtn.addEventListener('click', nextStepsFromVoidToInbox);
+        el.nextStepsBtn.addEventListener('click', () => openPathFromText(el.ideaInput.value || '', '', 'void'));
         el.colliderBtn.addEventListener('click', ideaCollider);
         el.startBtn.addEventListener('click', startTimer);
         el.endEarlyBtn.addEventListener('click', () => {
@@ -3714,7 +3859,11 @@
         // idea → task modal
         const closeIdeaTask = () => closeIdeaTaskModal();
         el.ideaToTaskBtn.addEventListener('click', generateTasksFromSelectedIdea);
-        el.ideaToInboxBtn.addEventListener('click', nextStepsFromSelectedIdeaToInbox);
+        el.ideaToInboxBtn.addEventListener('click', () => {
+          const idea = selectedIdeaId ? state.ideas.find((x) => x.id === selectedIdeaId) : null;
+          if (!idea) return;
+          openPathFromText(idea.text, String(el.actionText.textContent || ''), 'idea');
+        });
         el.ideaTaskBackdrop.addEventListener('click', closeIdeaTask);
         el.ideaTaskCloseBtn.addEventListener('click', closeIdeaTask);
         el.ideaTaskCancelBtn.addEventListener('click', closeIdeaTask);
@@ -3737,6 +3886,26 @@
           addIdeaTaskToCalendar(t);
         });
 
+        // AI path modal
+        const closePath = () => closePathModal();
+        el.pathBackdrop.addEventListener('click', closePath);
+        el.pathCloseBtn.addEventListener('click', closePath);
+        el.pathCancelBtn.addEventListener('click', closePath);
+        el.pathParseBtn.addEventListener('click', () => {
+          const stepsText = parsePathSteps(el.pathRaw.value, 14);
+          pathDraft.steps = assignDatesToSteps(stepsText, pathDraft.startYMD || (calendar?.selectedYMD || toYMD(new Date())), pathDraft.horizonDays);
+          renderPathSteps();
+          toast(`已解析 ${pathDraft.steps.length} 步。`, 'default');
+        });
+        el.pathAddAllBtn.addEventListener('click', addAllPathStepsToInbox);
+        el.pathSteps.addEventListener('click', (e) => {
+          const btn = e.target?.closest?.('[data-path-add]');
+          if (!btn) return;
+          const idx = Number(btn.getAttribute('data-path-add'));
+          if (Number.isNaN(idx)) return;
+          addPathStepToInbox(idx);
+        });
+
         // settings modal
         const openSettings = () => {
           el.settingsModal.classList.remove('hidden');
@@ -3753,6 +3922,7 @@
           if (!el.inboxModal.classList.contains('hidden')) closeInboxModal();
           if (!el.colliderModal.classList.contains('hidden')) closeColliderModal({ clearSelection: true });
           if (!el.ideaTaskModal.classList.contains('hidden')) closeIdeaTaskModal();
+          if (!el.pathModal.classList.contains('hidden')) closePathModal();
           if (!el.settingsModal.classList.contains('hidden')) closeSettings();
         });
 
