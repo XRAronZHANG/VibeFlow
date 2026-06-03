@@ -208,6 +208,15 @@
 
             <div class="flex items-center gap-3">
               <button
+                id="helpBtn"
+                class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-3 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
+                title="使用说明"
+              >
+                <i data-lucide="help-circle" class="h-4 w-4 text-neon-cyan"></i>
+                <span class="hidden sm:inline">使用说明</span>
+              </button>
+
+              <button
                 id="settingsBtn"
                 class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-3 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition active:scale-[0.99]"
                 title="设置：DeepSeek / 标签"
@@ -264,10 +273,10 @@
                     <i data-lucide="orbit" class="h-4 w-4 text-neon-cyan"></i>
                     <span class="text-sm font-medium">The Void · 极致输入区</span>
                   </div>
-                  <div class="hidden sm:flex items-center gap-2 text-xs text-slate-300/70">
-                    <i data-lucide="corner-down-left" class="h-4 w-4"></i>
-                    <span>回车发射 · Shift+回车换行</span>
-                  </div>
+                <div class="hidden sm:flex items-center gap-2 text-xs text-slate-300/70">
+                  <i data-lucide="mouse-pointer-click" class="h-4 w-4"></i>
+                  <span>点击发射加入星空 · Shift+回车换行</span>
+                </div>
                 </div>
 
                 <div class="mt-4 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
@@ -783,6 +792,99 @@
       <div id="toasts" class="fixed right-4 top-4 z-40 flex w-[min(420px,calc(100vw-2rem))] flex-col gap-2"></div>
     </div>
 
+    <!-- Help / Guide Modal -->
+    <div id="helpModal" class="fixed inset-0 z-50 hidden">
+      <div id="helpBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+          <div class="relative overflow-hidden rounded-3xl bg-space-850/95 ring-1 ring-white/10 shadow-soft">
+            <div class="pointer-events-none absolute inset-0">
+              <div class="absolute -top-24 -left-10 h-64 w-64 rounded-full bg-cyan-400/10 blur-3xl"></div>
+              <div class="absolute -bottom-24 -right-10 h-64 w-64 rounded-full bg-violet-500/12 blur-3xl"></div>
+            </div>
+
+            <div class="relative p-5 sm:p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="help-circle" class="h-4 w-4 text-neon-cyan"></i>
+                    <div class="text-sm font-semibold">使用说明 · 先别完美，先开始</div>
+                  </div>
+                  <div class="mt-1 text-xs leading-relaxed text-slate-300/70">
+                    这是一个给拖延/ADHD 脑的“启动器”：把灵感变成可执行的一小步，然后把下一步收好。
+                  </div>
+                </div>
+                <button id="helpCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
+                  <i data-lucide="x" class="h-4 w-4"></i>
+                </button>
+              </div>
+
+              <div class="mt-5 grid gap-4">
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="text-sm font-semibold">30 秒上手（真的）</div>
+                  <ol class="mt-3 grid gap-2 text-sm text-slate-200/90">
+                    <li class="flex gap-2"><span class="text-neon-gold font-semibold">1)</span><span>在 <b>The Void</b> 输入一句话（你想做什么/你在想什么）。</span></li>
+                    <li class="flex gap-2"><span class="text-neon-gold font-semibold">2)</span><span>点击 <b>发射</b> → 它会进入 <b>灵感星空</b>（注意：不支持回车发射，避免误触）。</span></li>
+                    <li class="flex gap-2"><span class="text-neon-gold font-semibold">3)</span><span>点一颗星 → 右侧生成一个 <b>3 分钟微动</b>（可调），然后点 <b>开始</b>。</span></li>
+                    <li class="flex gap-2"><span class="text-neon-gold font-semibold">4)</span><span>结束后点 <b>标记完成</b>，去右下角敲一下 <b>功德</b>：给大脑一个“我做到了”的奖励。</span></li>
+                  </ol>
+                </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="text-sm font-semibold">三个按钮各干嘛？</div>
+                  <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div class="rounded-3xl bg-black/20 p-4 ring-1 ring-white/10">
+                      <div class="text-xs text-slate-300/70">发射</div>
+                      <div class="mt-1 text-sm font-semibold">把一句话存成灵感</div>
+                      <div class="mt-1 text-xs text-slate-300/70">之后你可以点星星拆解成微行动。</div>
+                    </div>
+                    <div class="rounded-3xl bg-black/20 p-4 ring-1 ring-white/10">
+                      <div class="text-xs text-slate-300/70">入历</div>
+                      <div class="mt-1 text-sm font-semibold">把输入转成一个任务</div>
+                      <div class="mt-1 text-xs text-slate-300/70">适合：你已经知道要做什么/大概什么时候做。</div>
+                    </div>
+                    <div class="rounded-3xl bg-black/20 p-4 ring-1 ring-white/10">
+                      <div class="text-xs text-slate-300/70">AI 给条路</div>
+                      <div class="mt-1 text-sm font-semibold">给你一个可行步骤清单</div>
+                      <div class="mt-1 text-xs text-slate-300/70">参考用；你可把任一步加入收集箱，再编辑后入历。</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="text-sm font-semibold">“AI 给条路”怎么用才顺？</div>
+                  <ul class="mt-3 grid gap-2 text-sm text-slate-200/90">
+                    <li>• AI 输出会显示为“步骤卡片”。你点 <b>加入收集箱</b> 后，这一步会从列表消失（表示已收好）。</li>
+                    <li>• 如果 AI 输出很乱：直接把文本框改成 <b>每行一步</b>，再点 <b>解析为步骤</b>。</li>
+                    <li>• 收集箱里的条目可以改日期/时间/分钟，然后再加入日历。</li>
+                  </ul>
+                </div>
+
+                <div class="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                  <div class="text-sm font-semibold">隐私与存储</div>
+                  <ul class="mt-3 grid gap-2 text-sm text-slate-200/90">
+                    <li>• 数据保存在你的浏览器本地（localStorage），<b>不登录</b>、不上传数据库。</li>
+                    <li>• AI 功能通过站点代理调用 DeepSeek，可能受网络/限流影响；失败时你仍可手动写步骤并加入收集箱。</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="mt-5 flex flex-wrap items-center justify-between gap-2">
+                <div class="text-xs text-slate-300/60">提示：你随时可以点右上角「使用说明」再次打开。</div>
+                <button
+                  id="helpOkBtn"
+                  class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon-gold/85 to-violet-400/60 px-4 py-2.5 text-xs font-semibold text-slate-950 shadow-glowG hover:brightness-110 transition active:scale-[0.99]"
+                >
+                  <i data-lucide="check" class="h-4 w-4"></i>
+                  我知道了
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Settings Modal -->
     <div id="settingsModal" class="fixed inset-0 z-50 hidden">
       <div id="settingsBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
@@ -1228,6 +1330,7 @@
         INBOX: 'vibeflow_inbox_v1',
         STATS: 'vibeflow_stats_v1',
         WEATHER: 'vibeflow_weather_v1',
+        HELP_SEEN: 'vibeflow_help_seen_v1',
       };
 
       const DECAY_MS = 12 * 60 * 60 * 1000; // 12小时后“发霉”（可自行改）
@@ -1283,6 +1386,7 @@
       // DOM
       const el = {
         meritCount: document.getElementById('meritCount'),
+        helpBtn: document.getElementById('helpBtn'),
         ideaInput: document.getElementById('ideaInput'),
         launchBtn: document.getElementById('launchBtn'),
         taskifyBtn: document.getElementById('taskifyBtn'),
@@ -1317,6 +1421,12 @@
         ritualReadyDot: document.getElementById('ritualReadyDot'),
         floatText: document.getElementById('floatText'),
         toasts: document.getElementById('toasts'),
+
+        // help modal
+        helpModal: document.getElementById('helpModal'),
+        helpBackdrop: document.getElementById('helpBackdrop'),
+        helpCloseBtn: document.getElementById('helpCloseBtn'),
+        helpOkBtn: document.getElementById('helpOkBtn'),
         graveToggle: document.getElementById('graveToggle'),
         gravePanel: document.getElementById('gravePanel'),
         graveList: document.getElementById('graveList'),
@@ -3204,6 +3314,15 @@
         pathDraft = { source: 'void', input: '', startYMD: '', horizonDays: 7, steps: [] };
       }
 
+      function openHelpModal() {
+        el.helpModal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+
+      function closeHelpModal() {
+        el.helpModal.classList.add('hidden');
+      }
+
       function assignDatesToSteps(steps, startYMD, horizonDays) {
         const h = Math.max(1, Math.min(14, Math.round(Number(horizonDays || 7))));
         return steps.map((t, i) => {
@@ -3255,7 +3374,12 @@
         if (!step) return;
         const items = buildInboxItemsFromSteps([step], pathDraft.input);
         const n = pushInboxSuggestions(items, 'ai');
-        if (n) toast('已加入收集箱。', 'good');
+        if (n) {
+          // 立即从列表移除，让用户“看见已加入”
+          pathDraft.steps.splice(idx, 1);
+          renderPathSteps();
+          toast('已加入收集箱：这一步已收好。', 'good');
+        }
       }
 
       function addAllPathStepsToInbox() {
@@ -3264,6 +3388,9 @@
         const items = buildInboxItemsFromSteps(steps, pathDraft.input);
         const n = pushInboxSuggestions(items, 'ai');
         if (n) {
+          // 清空步骤列表，让用户“看见已加入”
+          pathDraft.steps = [];
+          renderPathSteps();
           openInboxModal();
           toast(`已加入收集箱：${n} 步。`, 'good');
         }
@@ -3728,16 +3855,13 @@
           el.charCount.textContent = String(el.ideaInput.value.length);
         });
 
-        el.ideaInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            launchIdea();
-          }
-        });
+        // 不再支持“回车发射”：避免用户没输完就误发射
+        // Shift+Enter 仍可换行（浏览器默认行为）
 
         el.launchBtn.addEventListener('click', launchIdea);
         el.taskifyBtn.addEventListener('click', taskifyVoidToCalendar);
         el.nextStepsBtn.addEventListener('click', () => openPathFromText(el.ideaInput.value || '', '', 'void'));
+        el.helpBtn.addEventListener('click', openHelpModal);
         el.colliderBtn.addEventListener('click', ideaCollider);
         el.startBtn.addEventListener('click', startTimer);
         el.endEarlyBtn.addEventListener('click', () => {
@@ -3906,6 +4030,12 @@
           addPathStepToInbox(idx);
         });
 
+        // help modal
+        const closeHelp = () => closeHelpModal();
+        el.helpBackdrop.addEventListener('click', closeHelp);
+        el.helpCloseBtn.addEventListener('click', closeHelp);
+        el.helpOkBtn.addEventListener('click', closeHelp);
+
         // settings modal
         const openSettings = () => {
           el.settingsModal.classList.remove('hidden');
@@ -3923,6 +4053,7 @@
           if (!el.colliderModal.classList.contains('hidden')) closeColliderModal({ clearSelection: true });
           if (!el.ideaTaskModal.classList.contains('hidden')) closeIdeaTaskModal();
           if (!el.pathModal.classList.contains('hidden')) closePathModal();
+          if (!el.helpModal.classList.contains('hidden')) closeHelpModal();
           if (!el.settingsModal.classList.contains('hidden')) closeSettings();
         });
 
@@ -4050,6 +4181,12 @@
         wire();
         lucide.createIcons();
         toast(`欢迎回来。今天只需要：开始 ${Math.round((state.ui.durationSec || DEFAULT_DURATION_SEC) / 60)} 分钟。`, 'purple');
+
+        // first-time guide
+        if (String(localStorage.getItem(LS.HELP_SEEN) || '') !== '1') {
+          localStorage.setItem(LS.HELP_SEEN, '1');
+          setTimeout(() => openHelpModal(), 250);
+        }
       }
 
       function setDurationMin(min) {
