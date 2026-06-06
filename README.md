@@ -35,26 +35,13 @@ https://vibeflowbyaron.netlify.app/
 
 ## Demo（作业展示建议）
 
-> 部署在 Netlify 后，把站点链接贴到这里（可选）。
+> https://vibeflowbyaron.netlify.app/。
 
 建议展示顺序：
 1) 打开站点 → 自动弹出「使用说明」
 2) The Void 输入一句话 → 发射
 3) 点一颗星 → 3 分钟微动 → 标记完成 → 功德 +1
 4) AI 给条路 → 选一步加入收集箱 → 再入历
-
----
-
-## 截图（Screenshots）
-
-> 截图文件位于 `assets/screenshots/`。
-
-| 页面 | 预览 |
-|---|---|
-| 新手引导（首次打开自动弹出） | ![](assets/screenshots/01-guide.png) |
-| 首页 / The Void（发射/入历/AI 给条路入口） | ![](assets/screenshots/02-home.png) |
-| AI 给条路（路径参考 + 可加入收集箱） | ![](assets/screenshots/03-ai-path.png) |
-| 收集箱（编辑后入历） | ![](assets/screenshots/04-inbox.png) |
 
 ---
 
@@ -121,7 +108,7 @@ https://vibeflowbyaron.netlify.app/
 
 ---
 
-## 如何运行（本地）
+## 如何运行（本地）（不建议本地运行，建议直接体验线上demo）
 
 ### 方式 1：直接打开（最简单）
 双击打开 `index.html` 即可使用大部分功能。
@@ -181,9 +168,6 @@ netlify dev
 
 4) 触发一次重新部署（push commit 或 Trigger deploy）
 
-部署成功后，函数地址为：
-```
-https://<你的站点域名>/.netlify/functions/ai
 ```
 
 ---
