@@ -905,7 +905,8 @@
                   </div>
                   <div class="mt-1 text-xs leading-relaxed text-slate-300/70">
                     这里的配置会保存在你的浏览器本地（localStorage）。<br />
-                    本站采用 <span class="text-slate-200">Netlify 代理</span>：AI 由站点统一提供，访客无需填写自己的 API Key。
+                    本站采用 <span class="text-slate-200">Netlify 代理</span>：AI 由站点统一提供，访客无需填写自己的 API Key。<br />
+                    你也可以在「数据管理」中导出/导入备份，或清空本地数据。
                   </div>
                 </div>
                 <button id="settingsCloseBtn" class="rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 hover:bg-white/8 transition">
@@ -949,6 +950,48 @@
                   </button>
                 </div>
                 <div id="tagEditorList" class="mt-4 grid gap-3"></div>
+              </div>
+
+              <!-- Data -->
+              <div class="mt-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <div class="text-sm font-semibold">数据管理</div>
+                    <div class="mt-1 text-xs text-slate-300/70">
+                      数据默认保存在本地浏览器（localStorage）。你可以导出备份、导入恢复，或清空重来。
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                  <button
+                    id="exportDataBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                    title="导出本地数据为 JSON 文件"
+                  >
+                    <i data-lucide="download" class="h-4 w-4 text-neon-cyan"></i>
+                    导出 JSON
+                  </button>
+                  <button
+                    id="importDataBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 ring-1 ring-white/10 hover:bg-white/8 transition"
+                    title="从 JSON 文件导入（会覆盖本地数据）"
+                  >
+                    <i data-lucide="upload" class="h-4 w-4 text-neon-emerald"></i>
+                    导入 JSON
+                  </button>
+                  <input id="importFileInput" type="file" accept="application/json" class="hidden" />
+                  <button
+                    id="clearDataBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-200 ring-1 ring-rose-400/20 hover:bg-rose-500/20 transition"
+                    title="清空本地所有数据（双击确认）"
+                  >
+                    <i data-lucide="trash-2" class="h-4 w-4"></i>
+                    清空数据
+                  </button>
+                </div>
+                <div class="mt-3 text-xs text-slate-300/60">
+                  导入/清空会刷新页面。若你在公共电脑使用，请导出后再清空。
+                </div>
               </div>
 
               <div class="mt-5 flex flex-wrap items-center justify-end gap-2">
@@ -1443,6 +1486,10 @@
         aiEnabled: document.getElementById('aiEnabled'),
         tagEditorList: document.getElementById('tagEditorList'),
         addTagBtn: document.getElementById('addTagBtn'),
+        exportDataBtn: document.getElementById('exportDataBtn'),
+        importDataBtn: document.getElementById('importDataBtn'),
+        importFileInput: document.getElementById('importFileInput'),
+        clearDataBtn: document.getElementById('clearDataBtn'),
 
         // inbox (header + widgets)
         inboxBtn: document.getElementById('inboxBtn'),
@@ -1636,6 +1683,56 @@
             ai: state.ai,
           })
         );
+      }
+
+      function exportAllData() {
+        const payload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          app: 'VibeFlow',
+          data: {
+            ideas: safeJsonParse(localStorage.getItem(LS.IDEAS), []),
+            merit: Number(localStorage.getItem(LS.MERIT) ?? 0) || 0,
+            tasks: safeJsonParse(localStorage.getItem(LS.TASKS), []),
+            inbox: safeJsonParse(localStorage.getItem(LS.INBOX), []),
+            stats: safeJsonParse(localStorage.getItem(LS.STATS), { microByDate: {} }),
+            weather: safeJsonParse(localStorage.getItem(LS.WEATHER), {}),
+            ui: safeJsonParse(localStorage.getItem(LS.UI), {}),
+            settings: safeJsonParse(localStorage.getItem(LS.SETTINGS), {}),
+            helpSeen: String(localStorage.getItem(LS.HELP_SEEN) || ''),
+          },
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `vibeflow_backup_${toYMD(new Date()).replaceAll('-', '')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 500);
+      }
+
+      function importAllDataFromJson(obj) {
+        const data = obj?.data || obj; // 允许用户直接导入 data 节点
+        if (!data || typeof data !== 'object') throw new Error('JSON 结构不正确');
+        if (data.ideas != null) localStorage.setItem(LS.IDEAS, JSON.stringify(data.ideas));
+        if (data.merit != null) localStorage.setItem(LS.MERIT, String(data.merit));
+        if (data.tasks != null) localStorage.setItem(LS.TASKS, JSON.stringify(data.tasks));
+        if (data.inbox != null) localStorage.setItem(LS.INBOX, JSON.stringify(data.inbox));
+        if (data.stats != null) localStorage.setItem(LS.STATS, JSON.stringify(data.stats));
+        if (data.weather != null) localStorage.setItem(LS.WEATHER, JSON.stringify(data.weather));
+        if (data.ui != null) localStorage.setItem(LS.UI, JSON.stringify(data.ui));
+        if (data.settings != null) localStorage.setItem(LS.SETTINGS, JSON.stringify(data.settings));
+        if (data.helpSeen != null) localStorage.setItem(LS.HELP_SEEN, String(data.helpSeen));
+      }
+
+      function clearAllData() {
+        Object.values(LS).forEach((k) => {
+          try {
+            localStorage.removeItem(k);
+          } catch {}
+        });
       }
 
       function uid() {
@@ -4083,6 +4180,48 @@
           renderSettingsUI();
           lucide.createIcons();
           toast('已恢复默认设置。', 'default');
+        });
+
+        // data management
+        el.exportDataBtn.addEventListener('click', () => {
+          exportAllData();
+          toast('已导出 JSON 备份。', 'good');
+        });
+        el.importDataBtn.addEventListener('click', () => el.importFileInput.click());
+        el.importFileInput.addEventListener('change', async () => {
+          const file = el.importFileInput.files?.[0];
+          el.importFileInput.value = '';
+          if (!file) return;
+          try {
+            const txt = await file.text();
+            const obj = safeJsonParse(txt, null);
+            if (!obj) throw new Error('无法解析 JSON');
+            importAllDataFromJson(obj);
+            toast('已导入数据：正在刷新…', 'good');
+            setTimeout(() => location.reload(), 400);
+          } catch (err) {
+            toast(`导入失败：${String(err?.message || err)}`, 'warn');
+          }
+        });
+        let clearArmed = false;
+        let clearTimer = null;
+        el.clearDataBtn.addEventListener('click', () => {
+          if (!clearArmed) {
+            clearArmed = true;
+            el.clearDataBtn.classList.add('ring-2', 'ring-rose-400/40');
+            toast('再点一次：清空本地所有数据（2秒内确认）。', 'warn');
+            clearTimer = setTimeout(() => {
+              clearArmed = false;
+              el.clearDataBtn.classList.remove('ring-2', 'ring-rose-400/40');
+            }, 2000);
+            return;
+          }
+          if (clearTimer) clearTimeout(clearTimer);
+          clearArmed = false;
+          el.clearDataBtn.classList.remove('ring-2', 'ring-rose-400/40');
+          clearAllData();
+          toast('已清空：正在刷新…', 'good');
+          setTimeout(() => location.reload(), 400);
         });
 
         el.addTagBtn.addEventListener('click', () => {
